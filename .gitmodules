@@ -1,0 +1,21 @@
+[submodule "ThirdParty/EASTL"]
+	path = ThirdParty/EASTL
+	url = https://github.com/electronicarts/EASTL.git
+[submodule "ThirdParty/EABase"]
+	path = ThirdParty/EABase
+	url = https://github.com/electronicarts/EABase.git
+[submodule "ThirdParty/EAMain"]
+	path = ThirdParty/EAMain
+	url = https://github.com/electronicarts/EAMain.git
+[submodule "ThirdParty/EAAssert"]
+	path = ThirdParty/EAAssert
+	url = https://github.com/electronicarts/EAAssert.git
+[submodule "ThirdParty/EAStdC"]
+	path = ThirdParty/EAStdC
+	url = https://github.com/electronicarts/EAStdC.git
+[submodule "ThirdParty/EAThread"]
+	path = ThirdParty/EAThread
+	url = https://github.com/electronicarts/EAThread.git
+[submodule "ThirdParty/angelscript-mirror"]
+	path = ThirdParty/angelscript-mirror
+	url = https://github.com/codecat/angelscript-mirror.git
