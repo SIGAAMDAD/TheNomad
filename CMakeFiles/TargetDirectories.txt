@@ -1,0 +1,8 @@
+/home/noah/Projects/TheNomad/CMakeFiles/TheNomad.x64.dir
+/home/noah/Projects/TheNomad/CMakeFiles/clean-all.dir
+/home/noah/Projects/TheNomad/CMakeFiles/edit_cache.dir
+/home/noah/Projects/TheNomad/CMakeFiles/rebuild_cache.dir
+/home/noah/Projects/TheNomad/CMakeFiles/list_install_components.dir
+/home/noah/Projects/TheNomad/CMakeFiles/install.dir
+/home/noah/Projects/TheNomad/CMakeFiles/install/local.dir
+/home/noah/Projects/TheNomad/CMakeFiles/install/strip.dir
