@@ -317,6 +317,42 @@ VKContext::VKContext( const ContextInfo_t& contextInfo )
 	m_ContextData = contextInfo;
 }
 
+const QueueFamilyIndices_t FindQueueFamilies( void )
+{
+	QueueFamilyIndices_t indices;
+
+	uint32_t nQueueFamilyCount;
+	VkQueueFamilyProperties *pQueueProperties;
+
+	memset( &indices, 0, sizeof( indices ) );
+
+	nQueueFamilyCount = 0;
+	vkGetPhysicalDeviceQueueFamilyProperties( g_pVKContext->GetPhysicalDevice(), &nQueueFamilyCount, NULL );
+
+	pQueueProperties = (VkQueueFamilyProperties *)alloca( sizeof( *pQueueProperties ) * nQueueFamilyCount );
+	vkGetPhysicalDeviceQueueFamilyProperties( g_pVKContext->GetPhysicalDevice(), &nQueueFamilyCount, pQueueProperties );
+
+	for ( uint32_t i = 0; i < nQueueFamilyCount; i++ ) {
+		if ( pQueueProperties[i].queueFlags & VK_QUEUE_GRAPHICS_BIT ) {
+			indices.bHasGraphicsFamily = true;
+			indices.nGraphicsFamily = i;
+
+			VkBool32 presentSupport = false;
+			vkGetPhysicalDeviceSurfaceSupportKHR( g_pVKContext->GetPhysicalDevice(), i, g_pVKContext->GetSurface(), &presentSupport );
+			if ( presentSupport ) {
+				indices.bHasPresentFamily = true;
+				indices.nPresentFamily = i;
+			}
+
+			if ( indices.IsComplete() ) {
+				break;
+			}
+		}
+	}
+
+	return indices;
+}
+
 bool VKContext::CreateWindow( void )
 {
 	Uint32 flags;
@@ -426,43 +462,11 @@ bool VKContext::CreateWindow( void )
 	InitPhysicalDevice();
 	InitLogicalDevice();
 	InitSwapChain();
+	CreateFixedFunctionPipeline();
+	InitRenderPass();
+	InitCommandBuffer();
 
 	return true;
-}
-
-QueueFamilyIndices_t FindQueueFamilies( void )
-{
-	QueueFamilyIndices_t indices;
-	uint32_t nQueueFamilyCount;
-	VkQueueFamilyProperties *pQueueProperties;
-
-	memset( &indices, 0, sizeof( indices ) );
-
-	nQueueFamilyCount = 0;
-	vkGetPhysicalDeviceQueueFamilyProperties( g_pVKContext->GetPhysicalDevice(), &nQueueFamilyCount, NULL );
-
-	pQueueProperties = (VkQueueFamilyProperties *)alloca( sizeof( *pQueueProperties ) * nQueueFamilyCount );
-	vkGetPhysicalDeviceQueueFamilyProperties( g_pVKContext->GetPhysicalDevice(), &nQueueFamilyCount, pQueueProperties );
-
-	for ( uint32_t i = 0; i < nQueueFamilyCount; i++ ) {
-		if ( pQueueProperties[i].queueFlags & VK_QUEUE_GRAPHICS_BIT ) {
-			indices.bHasGraphicsFamily = true;
-			indices.nGraphicsFamily = i;
-
-			VkBool32 presentSupport = false;
-			vkGetPhysicalDeviceSurfaceSupportKHR( g_pVKContext->GetPhysicalDevice(), i, g_pVKContext->GetSurface(), &presentSupport );
-			if ( presentSupport ) {
-				indices.bHasPresentFamily = true;
-				indices.nPresentFamily = i;
-			}
-
-			if ( indices.IsComplete() ) {
-				break;
-			}
-		}
-	}
-
-	return indices;
 }
 
 SwapChainSupportInfo_t& QuerySwapChainSupport( void )
@@ -572,6 +576,8 @@ void VKContext::InitPhysicalDevice( void )
 			nCurrentScore = nDeviceScore;
 		}
 	}
+
+	DumpPhysicalDeviceFeatures( m_hPhysicalDevice );
 }
 
 void VKContext::InitLogicalDevice( void )
@@ -741,7 +747,7 @@ void VKContext::InitSwapChain( void )
 	createInfo.imageArrayLayers = 1;
 	createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-	QueueFamilyIndices_t indices = FindQueueFamilies();
+	const QueueFamilyIndices_t indices = FindQueueFamilies();
 	uint32_t szQueueFamilyIndices[] = {
 		indices.nGraphicsFamily,
 		indices.nPresentFamily
@@ -762,13 +768,227 @@ void VKContext::InitSwapChain( void )
 	createInfo.clipped = VK_TRUE;
 	createInfo.oldSwapchain = VK_NULL_HANDLE;
 
-	SIRENGINE_LOG_LEVEL( VulkanBackend, ELogLevel::Info, "Allocating vulkan swapchain...\n" );
+	SIRENGINE_LOG_LEVEL( VulkanBackend, ELogLevel::Info, "Allocating vulkan swapchain..." );
 	VK_CALL( vkCreateSwapchainKHR( m_hDevice, &createInfo, NULL, &m_hSwapChain ) );
-	SIRENGINE_LOG_LEVEL( VulkanBackend, ELogLevel::Info, "Done.\n" );
+	SIRENGINE_LOG_LEVEL( VulkanBackend, ELogLevel::Info, "Done." );
+
+	vkGetSwapchainImagesKHR( m_hDevice, m_hSwapChain, &imageCount, NULL );
+	m_SwapChainImages.resize( imageCount );
+	m_SwapChainImageViews.resize( imageCount );
+	vkGetSwapchainImagesKHR( m_hDevice, m_hSwapChain, &imageCount, m_SwapChainImages.data() );
+
+	m_nSwapChainFormat = surfaceFormat.format;
+	m_nSwapChainExtent = extent;
+
+	for ( uint32_t i = 0; i < m_SwapChainImages.size(); i++ ) {
+		VkImageViewCreateInfo imageCreateInfo;
+		memset( &imageCreateInfo, 0, sizeof( imageCreateInfo ) );
+		imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+		imageCreateInfo.image = m_SwapChainImages[i];
+		imageCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+		imageCreateInfo.format = m_nSwapChainFormat;
+		imageCreateInfo.components.r = VK_COMPONENT_SWIZZLE_R;
+		imageCreateInfo.components.g = VK_COMPONENT_SWIZZLE_G;
+		imageCreateInfo.components.b = VK_COMPONENT_SWIZZLE_B;
+		imageCreateInfo.components.a = VK_COMPONENT_SWIZZLE_A;
+		imageCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		imageCreateInfo.subresourceRange.baseMipLevel = 0;
+		imageCreateInfo.subresourceRange.levelCount = 1;
+		imageCreateInfo.subresourceRange.baseArrayLayer = 0;
+		imageCreateInfo.subresourceRange.layerCount = 1;
+
+		VK_CALL( vkCreateImageView( m_hDevice, &imageCreateInfo, NULL, &m_SwapChainImageViews[i] ) );
+	}
+}
+
+void VKContext::CreateFixedFunctionPipeline( void )
+{
+	SIRENGINE_LOG_LEVEL( VulkanBackend, ELogLevel::Info, "Initializing vulkan pipeline layout..." );
+
+	VkDynamicState dynamicStates[] = {
+		VK_DYNAMIC_STATE_VIEWPORT,
+		VK_DYNAMIC_STATE_SCISSOR
+	};
+
+	VkPipelineDynamicStateCreateInfo createInfo;
+	memset( &createInfo, 0, sizeof( createInfo ) );
+	createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+	createInfo.pDynamicStates = dynamicStates;
+	createInfo.dynamicStateCount = SIREngine_StaticArrayLength( dynamicStates );
+
+	VkPipelineVertexInputStateCreateInfo vertexInputInfo;
+	memset( &vertexInputInfo, 0, sizeof( vertexInputInfo ) );
+	vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+	vertexInputInfo.vertexBindingDescriptionCount = 0;
+	vertexInputInfo.pVertexBindingDescriptions = NULL; // optional
+	vertexInputInfo.vertexAttributeDescriptionCount = 0;
+	vertexInputInfo.pVertexAttributeDescriptions = NULL; // optional
+
+	VkPipelineInputAssemblyStateCreateInfo inputAssembly;
+	memset( &inputAssembly, 0, sizeof( inputAssembly ) );
+	inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+	inputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+	inputAssembly.primitiveRestartEnable = VK_FALSE;
+
+	VkViewport viewport;
+	memset( &viewport, 0, sizeof( viewport ) );
+	viewport.x = 0;
+	viewport.y = 0;
+	viewport.width = (float)m_nSwapChainExtent.width;
+	viewport.height = (float)m_nSwapChainExtent.height;
+	viewport.minDepth = 0.0f;
+	viewport.maxDepth = 1.0f;
+
+	VkRect2D scissor;
+	scissor.extent = m_nSwapChainExtent;
+	scissor.offset = { 0, 0 };
+
+	VkPipelineViewportStateCreateInfo viewportState;
+	memset( &viewportState,  0, sizeof( viewportState ) );
+	viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+	viewportState.viewportCount = 1;
+	viewportState.scissorCount = 1;
+
+	VkPipelineRasterizationStateCreateInfo rasterizer;
+	memset( &rasterizer, 0, sizeof( rasterizer ) );
+	rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+	rasterizer.depthClampEnable = VK_FALSE;
+	rasterizer.rasterizerDiscardEnable = VK_FALSE;
+	rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
+	rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
+	rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
+	rasterizer.depthBiasEnable = VK_FALSE;
+
+
+	VkPipelineMultisampleStateCreateInfo multisampling;
+	memset( &multisampling, 0, sizeof( multisampling ) );
+	multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+	multisampling.sampleShadingEnable = VK_FALSE;
+	multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+	multisampling.minSampleShading = 1.0f; // Optional
+	multisampling.pSampleMask = NULL; // Optional
+	multisampling.alphaToCoverageEnable = VK_FALSE; // Optional
+	multisampling.alphaToOneEnable = VK_FALSE; // Optional
+
+	VkPipelineColorBlendAttachmentState colorBlendAttachment;
+	memset( &colorBlendAttachment, 0, sizeof( colorBlendAttachment ) );
+	colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+	colorBlendAttachment.blendEnable = VK_FALSE;
+	colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE; // Optional
+	colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO; // Optional
+	colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD; // Optional
+	colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE; // Optional
+	colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO; // Optional
+	colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD; // Optional
+
+	VkPipelineLayoutCreateInfo pipelineLayoutInfo;
+	memset( &pipelineLayoutInfo, 0, sizeof( pipelineLayoutInfo ) );
+	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+	pipelineLayoutInfo.setLayoutCount = 0; // Optional
+	pipelineLayoutInfo.pSetLayouts = NULL; // Optional
+	pipelineLayoutInfo.pushConstantRangeCount = 0; // Optional
+	pipelineLayoutInfo.pPushConstantRanges = NULL; // Optional
+
+	VK_CALL( vkCreatePipelineLayout( m_hDevice, &pipelineLayoutInfo, NULL, &m_hPipelineLayout ) );
+}
+
+void VKContext::InitRenderPass( void )
+{
+	SIRENGINE_LOG_LEVEL( VulkanBackend, ELogLevel::Info, "Creating vulkan renderPass..." );
+
+	VkAttachmentDescription colorAttachment;
+	memset( &colorAttachment, 0, sizeof( colorAttachment ) );
+	colorAttachment.format = m_nSwapChainFormat;
+	colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+	colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+	colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+	colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+	colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+	colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+	
+	VkAttachmentReference colorAttachmentRef;
+	memset( &colorAttachmentRef, 0, sizeof( colorAttachmentRef ) );
+	colorAttachmentRef.attachment = 0;
+	colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+	VkSubpassDescription subpass;
+	memset( &subpass, 0, sizeof( subpass ) );
+	subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+	subpass.colorAttachmentCount = 1;
+	subpass.pColorAttachments = &colorAttachmentRef;
+
+	VkRenderPassCreateInfo renderPassInfo;
+	memset( &renderPassInfo, 0, sizeof( renderPassInfo ) );
+	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+	renderPassInfo.attachmentCount = 1;
+	renderPassInfo.pAttachments = &colorAttachment;
+	renderPassInfo.subpassCount = 1;
+	renderPassInfo.pSubpasses = &subpass;
+
+	VK_CALL( vkCreateRenderPass( m_hDevice, &renderPassInfo, NULL, &m_hRenderPass ) );
+	SIRENGINE_LOG_LEVEL( VulkanBackend, ELogLevel::Info, "Done." );
+
+	SIRENGINE_LOG_LEVEL( VulkanBackend, ELogLevel::Info, "Allocating SwapChain ImageView framebuffers..." );
+	m_SwapChainFramebuffers.resize( m_SwapChainImageViews.size() );
+	for ( uint32_t i = 0; i < m_SwapChainImageViews.size(); i++ ) {
+		VkImageView attachments[] = {
+			m_SwapChainImageViews[i]
+		};
+
+		VkFramebufferCreateInfo framebufferInfo;
+		memset( &framebufferInfo, 0, sizeof( framebufferInfo ) );
+		framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+		framebufferInfo.renderPass = m_hRenderPass;
+		framebufferInfo.attachmentCount = 1;
+		framebufferInfo.pAttachments = attachments;
+		framebufferInfo.width = m_nSwapChainExtent.width;
+		framebufferInfo.height = m_nSwapChainExtent.height;
+		framebufferInfo.layers = 1;
+
+		VK_CALL( vkCreateFramebuffer( m_hDevice, &framebufferInfo, NULL, &m_SwapChainFramebuffers[i] ) );
+	}
+}
+
+void VKContext::InitCommandBuffer( void )
+{
+	SIRENGINE_LOG_LEVEL( VulkanBackend, ELogLevel::Info, "Allocating command pool..." );
+
+	const QueueFamilyIndices_t& indices = FindQueueFamilies();
+
+	VkCommandPoolCreateInfo poolInfo;
+	memset( &poolInfo, 0, sizeof( poolInfo ) );
+	poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+	poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+	poolInfo.queueFamilyIndex = indices.nGraphicsFamily;
+
+	VK_CALL( vkCreateCommandPool( m_hDevice, &poolInfo, NULL, &m_hCommandPool ) );
+
+	SIRENGINE_LOG_LEVEL( VulkanBackend, ELogLevel::Info, "Allocating command buffers..." );
+
+	VkCommandBufferAllocateInfo allocInfo;
+	memset( &allocInfo, 0, sizeof( allocInfo ) );
+	allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+	allocInfo.commandPool = m_hCommandPool;
+	allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+	allocInfo.commandBufferCount = 1;
+
+	VK_CALL( vkAllocateCommandBuffers( m_hDevice, &allocInfo, m_hCommandBuffers ) );
+
+	SIRENGINE_LOG_LEVEL( VulkanBackend, ELogLevel::Info, "Vulkan CommandBuffer backend initialized." );
 }
 
 void VKContext::ShutdownBackend( void )
 {
+	vkDestroyCommandPool( m_hDevice, m_hCommandPool, NULL );
+	for ( auto& it : m_SwapChainFramebuffers ) {
+		vkDestroyFramebuffer( m_hDevice, it, NULL );
+	}
+	for ( auto& it : m_SwapChainImageViews ) {
+		vkDestroyImageView( m_hDevice, it, NULL );
+	}
+	vkDestroyPipelineLayout( m_hDevice, m_hPipelineLayout, NULL );
+	vkDestroyRenderPass( m_hDevice, m_hRenderPass, NULL );
 	vkDestroySwapchainKHR( m_hDevice, m_hSwapChain, NULL );
 	vkDestroySurfaceKHR( m_hInstance, m_hSurface, NULL );
 	vkDestroyDevice( m_hDevice, NULL );

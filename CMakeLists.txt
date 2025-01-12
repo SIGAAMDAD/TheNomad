@@ -34,6 +34,8 @@ set(SOURCE_FILES
 	Source/Engine/RenderLib/Backend/RenderContext.h
 	Source/Engine/RenderLib/Backend/RenderContext.cpp
 	Source/Engine/RenderLib/Backend/Vulkan/VulkanCommon.h
+	Source/Engine/RenderLib/Backend/Vulkan/VulkanShader.h
+	Source/Engine/RenderLib/Backend/Vulkan/VulkanShader.cpp
 	Source/Engine/RenderLib/Backend/Vulkan/VulkanContext.h
 	Source/Engine/RenderLib/Backend/Vulkan/VulkanContext.cpp
 	Source/Engine/Core/Pch.h
@@ -89,30 +91,26 @@ target_link_libraries(TheNomad.x64
 )
 
 # Shader files
-#set(SHADER_FILES
-#	${CMAKE_BINARY_DIR}/Resources/Shaders/Vulkan/Generic.frag.spv
-#	${CMAKE_BINARY_DIR}/Resources/Shaders/Vulkan/Generic.vert.spv
-#)
-#
-#add_custom_command(
-#	OUTPUT ${CMAKE_BINARY_DIR}/Resources/Shaders/Vulkan/Generic.frag.spv
-#	COMMAND glslangValidator -H -V -o ${CMAKE_BINARY_DIR}/Resources/Shaders/Vulkan/Generic.frag.spv -S frag ${CMAKE_SOURCE_DIR}/Resources/Shaders/Vulkan/Generic.frag.glsl
-#	DEPENDS ${CMAKE_SOURCE_DIR}/Resources/Shaders/Vulkan/Generic.frag.glsl
-#	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/Resources/Shaders/Vulkan
-#)
-#
-#add_custom_command(
-#	OUTPUT ${CMAKE_BINARY_DIR}/Resources/Shaders/Vulkan/Generic.vert.spv
-#	COMMAND glslangValidator -H -V -o ${CMAKE_BINARY_DIR}/Resources/Shaders/Vulkan/Generic.vert.spv -S vert ${CMAKE_SOURCE_DIR}/Resources/Shaders/Vulkan/Generic.vert.glsl
-#	DEPENDS ${CMAKE_SOURCE_DIR}/Resources/Shaders/Vulkan/Generic.vert.glsl
-#	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/Resources/Shaders/Vulkan
-#)
-#
-#
-#add_custom_target(
-#	shaders ALL
-#	DEPENDS ${SHADER_FILES}
-#)
+set(SHADER_FILES
+	${CMAKE_BINARY_DIR}/Resources/Shaders/Vulkan/Generic_fp.spv
+	${CMAKE_BINARY_DIR}/Resources/Shaders/Vulkan/Generic_vp.spv
+)
+add_custom_command(
+	OUTPUT ${CMAKE_BINARY_DIR}/Resources/Shaders/Vulkan/Generic_fp.spv
+	COMMAND glslangValidator -H -V -o ${CMAKE_BINARY_DIR}/Resources/Shaders/Vulkan/Generic_fp.spv -S frag ${CMAKE_SOURCE_DIR}/Resources/Shaders/Vulkan/Generic_fp.glsl
+	DEPENDS ${CMAKE_SOURCE_DIR}/Resources/Shaders/Vulkan/Generic_fp.glsl
+	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/Resources/Shaders/Vulkan
+)
+add_custom_command(
+	OUTPUT ${CMAKE_BINARY_DIR}/Resources/Shaders/Vulkan/Generic_vp.spv
+	COMMAND glslangValidator -H -V -o ${CMAKE_BINARY_DIR}/Resources/Shaders/Vulkan/Generic_vp.spv -S vert ${CMAKE_SOURCE_DIR}/Resources/Shaders/Vulkan/Generic_vp.glsl
+	DEPENDS ${CMAKE_SOURCE_DIR}/Resources/Shaders/Vulkan/Generic_vp.glsl
+	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/Resources/Shaders/Vulkan
+)
+add_custom_target(
+	shaders ALL
+	DEPENDS ${SHADER_FILES}
+)
 
 # Create output directory
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/obj)

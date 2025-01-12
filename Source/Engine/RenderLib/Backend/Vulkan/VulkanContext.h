@@ -6,9 +6,6 @@
 #endif
 
 #include "../RenderContext.h"
-#include "vk_mem_alloc.h"
-#include <SDL2/SDL_vulkan.h>
-#include <vulkan/vulkan.hpp>
 #include "VulkanCommon.h"
 
 namespace SIREngine::RenderLib::Vulkan {
@@ -18,6 +15,7 @@ class VKContext : public IRenderContext
 public:
 	VKContext( const ContextInfo_t& contextInfo );
 
+	VkDevice GetDevice( void );
 	VkPhysicalDevice GetPhysicalDevice( void );
 	VkSurfaceKHR GetSurface( void );
 
@@ -29,6 +27,11 @@ private:
 	void InitSwapChain( void );
 	void InitPhysicalDevice( void );
 	void InitLogicalDevice( void );
+	void InitRenderPass( void );
+	void InitCommandBuffer( void );
+	void CreateFixedFunctionPipeline( void );
+
+	void RecordCommandBuffer( VkCommandBuffer hCommandBuffer, uint32_t nImageIndex );
 
 	VkDebugUtilsMessengerEXT m_hDebugHandler;
 
@@ -58,6 +61,11 @@ private:
 };
 
 extern VKContext *g_pVKContext;
+
+SIRENGINE_FORCEINLINE VkDevice VKContext::GetDevice( void )
+{
+	return m_hDevice;
+}
 
 SIRENGINE_FORCEINLINE VkPhysicalDevice VKContext::GetPhysicalDevice( void )
 {

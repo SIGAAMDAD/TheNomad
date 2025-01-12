@@ -175,6 +175,19 @@ TheNomad.x64/fast:
 .PHONY : TheNomad.x64/fast
 
 #=============================================================================
+# Target rules for targets named shaders
+
+# Build rule for target.
+shaders: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 shaders
+.PHONY : shaders
+
+# fast build rule for target.
+shaders/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shaders.dir/build.make CMakeFiles/shaders.dir/build
+.PHONY : shaders/fast
+
+#=============================================================================
 # Target rules for targets named clean-all
 
 # Build rule for target.
@@ -571,6 +584,30 @@ Source/Engine/RenderLib/Backend/Vulkan/VulkanContext.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/RenderLib/Backend/Vulkan/VulkanContext.cpp.s
 .PHONY : Source/Engine/RenderLib/Backend/Vulkan/VulkanContext.cpp.s
 
+Source/Engine/RenderLib/Backend/Vulkan/VulkanShader.o: Source/Engine/RenderLib/Backend/Vulkan/VulkanShader.cpp.o
+.PHONY : Source/Engine/RenderLib/Backend/Vulkan/VulkanShader.o
+
+# target to build an object file
+Source/Engine/RenderLib/Backend/Vulkan/VulkanShader.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/RenderLib/Backend/Vulkan/VulkanShader.cpp.o
+.PHONY : Source/Engine/RenderLib/Backend/Vulkan/VulkanShader.cpp.o
+
+Source/Engine/RenderLib/Backend/Vulkan/VulkanShader.i: Source/Engine/RenderLib/Backend/Vulkan/VulkanShader.cpp.i
+.PHONY : Source/Engine/RenderLib/Backend/Vulkan/VulkanShader.i
+
+# target to preprocess a source file
+Source/Engine/RenderLib/Backend/Vulkan/VulkanShader.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/RenderLib/Backend/Vulkan/VulkanShader.cpp.i
+.PHONY : Source/Engine/RenderLib/Backend/Vulkan/VulkanShader.cpp.i
+
+Source/Engine/RenderLib/Backend/Vulkan/VulkanShader.s: Source/Engine/RenderLib/Backend/Vulkan/VulkanShader.cpp.s
+.PHONY : Source/Engine/RenderLib/Backend/Vulkan/VulkanShader.s
+
+# target to generate assembly for a file
+Source/Engine/RenderLib/Backend/Vulkan/VulkanShader.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/RenderLib/Backend/Vulkan/VulkanShader.cpp.s
+.PHONY : Source/Engine/RenderLib/Backend/Vulkan/VulkanShader.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -584,6 +621,7 @@ help:
 	@echo "... list_install_components"
 	@echo "... rebuild_cache"
 	@echo "... clean-all"
+	@echo "... shaders"
 	@echo "... TheNomad.x64"
 	@echo "... Source/Engine/Core/ConsoleManager.o"
 	@echo "... Source/Engine/Core/ConsoleManager.i"
@@ -633,6 +671,9 @@ help:
 	@echo "... Source/Engine/RenderLib/Backend/Vulkan/VulkanContext.o"
 	@echo "... Source/Engine/RenderLib/Backend/Vulkan/VulkanContext.i"
 	@echo "... Source/Engine/RenderLib/Backend/Vulkan/VulkanContext.s"
+	@echo "... Source/Engine/RenderLib/Backend/Vulkan/VulkanShader.o"
+	@echo "... Source/Engine/RenderLib/Backend/Vulkan/VulkanShader.i"
+	@echo "... Source/Engine/RenderLib/Backend/Vulkan/VulkanShader.s"
 .PHONY : help
 
 
