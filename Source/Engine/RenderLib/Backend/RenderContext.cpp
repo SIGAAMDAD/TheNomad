@@ -36,16 +36,16 @@ IRenderContext::IRenderContext( void )
 {
 	r_WindowMode.Register();
 	r_RenderAPI.Register();
+	r_VSync.Register();
 }
 
 IRenderContext::~IRenderContext()
 {
-	Shutdown();
 }
 
 void IRenderContext::Init( void )
 {
-	SIRENGINE_LOG_LEVEL( RenderBackend, ELogLevel::Info, "Initializing RenderBackend...\n" );
+	SIRENGINE_LOG_LEVEL( RenderBackend, ELogLevel::Info, "Initializing RenderBackend..." );
 	if ( !CreateWindow() ) {
 		SIRENGINE_LOG_LEVEL( RenderBackend, ELogLevel::Fatal, "Error creating SDL2 window: %s", SDL_GetError() );
 	}
@@ -53,6 +53,7 @@ void IRenderContext::Init( void )
 
 void IRenderContext::Shutdown( void )
 {
+	ShutdownBackend();
 	if ( m_pWindow ) {
 		SDL_DestroyWindow( m_pWindow );
 	}

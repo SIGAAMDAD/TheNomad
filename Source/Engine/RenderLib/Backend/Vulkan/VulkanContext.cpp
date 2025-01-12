@@ -292,8 +292,6 @@ static void DumpPhysicalDeviceFeatures( VkPhysicalDevice hDevice )
 
 VKContext *g_pVKContext;
 
-VkAllocationCallbacks VKContext::AllocationCallbacks;
-
 static void *Vulkan_Allocate( void *pUserData, size_t nSize, size_t nAlignment, VkSystemAllocationScope scope )
 {
 	void *pBuffer;
@@ -427,6 +425,7 @@ bool VKContext::CreateWindow( void )
 
 	InitPhysicalDevice();
 	InitLogicalDevice();
+	InitSwapChain();
 
 	return true;
 }
@@ -712,129 +711,68 @@ void VKContext::InitLogicalDevice( void )
 	
 		VK_CALL( vmaCreateAllocator( &allocatorInfo, &m_hAllocator ) );
 
-		AllocationCallbacks.pfnAllocation = Vulkan_Allocate;
-		AllocationCallbacks.pfnFree = Vulkan_Free;
-		AllocationCallbacks.pfnReallocation = Vulkan_Reallocate;
+		//AllocationCallbacks.pfnAllocation = Vulkan_Allocate;
+		//AllocationCallbacks.pfnFree = Vulkan_Free;
+		//AllocationCallbacks.pfnReallocation = Vulkan_Reallocate;
 	}
 }
 
 void VKContext::InitSwapChain( void )
 {
-	VkSurfaceFormatKHR surfaceFormat;
-	VkPresentModeKHR presentMode;
-	VkExtent2D extent;
-	uint32_t nImageCount, i;
-	QueueFamilyIndices_t queueIndices;
+	const SwapChainSupportInfo_t& details = QuerySwapChainSupport();
 
-	const SwapChainSupportInfo_t& swapChainSupport = QuerySwapChainSupport();
-	surfaceFormat = ChooseSwapSurfaceFormat( swapChainSupport.pFormats, swapChainSupport.nFormats );
-	presentMode = ChooseSwapPresentMode( swapChainSupport.pPresentModes, swapChainSupport.nPresentModes );
-	extent = ChooseSwapExtent( swapChainSupport.capabilities,
-		m_ContextData.nWindowWidth, m_ContextData.nWindowHeight );
+	VkSurfaceFormatKHR surfaceFormat = ChooseSwapSurfaceFormat( details.pFormats, details.nFormats );
+	VkPresentModeKHR presentMode = ChooseSwapPresentMode( details.pPresentModes, details.nPresentModes );
+	VkExtent2D extent = ChooseSwapExtent( details.capabilities, m_ContextData.nWindowWidth, m_ContextData.nWindowHeight );
 
-	nImageCount = swapChainSupport.capabilities.minImageCount + 1;
-	if ( swapChainSupport.capabilities.maxImageCount > 0 && nImageCount > swapChainSupport.capabilities.maxImageCount ) {
-		nImageCount = swapChainSupport.capabilities.maxImageCount;
+	uint32_t imageCount = details.capabilities.minImageCount;
+	if ( details.capabilities.maxImageCount > 0 && imageCount > details.capabilities.maxImageCount ) {
+		imageCount = details.capabilities.maxImageCount;
 	}
 
 	VkSwapchainCreateInfoKHR createInfo;
 	memset( &createInfo, 0, sizeof( createInfo ) );
 	createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-	createInfo.surface = GetSurface();
-	createInfo.minImageCount = nImageCount;
+	createInfo.surface = m_hSurface;
+	createInfo.minImageCount = imageCount;
 	createInfo.imageFormat = surfaceFormat.format;
 	createInfo.imageColorSpace = surfaceFormat.colorSpace;
 	createInfo.imageExtent = extent;
 	createInfo.imageArrayLayers = 1;
 	createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-	queueIndices = FindQueueFamilies();
-	const bool32 queueFamilyIndices[] = {
-		queueIndices.bHasGraphicsFamily, queueIndices.bHasPresentFamily
+	QueueFamilyIndices_t indices = FindQueueFamilies();
+	uint32_t szQueueFamilyIndices[] = {
+		indices.nGraphicsFamily,
+		indices.nPresentFamily
 	};
 
-	if ( queueIndices.nGraphicsFamily != queueIndices.nPresentFamily ) {
+	if ( indices.nGraphicsFamily != indices.nPresentFamily ) {
 		createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
 		createInfo.queueFamilyIndexCount = 2;
-		createInfo.pQueueFamilyIndices = queueFamilyIndices;
+		createInfo.pQueueFamilyIndices = szQueueFamilyIndices;
 	} else {
 		createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+		createInfo.queueFamilyIndexCount = 0; // optional
+		createInfo.pQueueFamilyIndices = szQueueFamilyIndices;
 	}
-
-	createInfo.preTransform = swapChainSupport.capabilities.currentTransform;
+	createInfo.preTransform = details.capabilities.currentTransform;
 	createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
 	createInfo.presentMode = presentMode;
 	createInfo.clipped = VK_TRUE;
 	createInfo.oldSwapchain = VK_NULL_HANDLE;
 
-	VK_CALL( fn_vkCreateSwapchainKHR( m_hDevice, &createInfo, &AllocationCallbacks, &m_hSwapChain ) );
-
-	VK_CALL( vkGetSwapchainImagesKHR( m_hDevice, m_hSwapChain, &nImageCount, NULL ) );
-	m_SwapChainImages.resize( nImageCount );
-	VK_CALL( vkGetSwapchainImagesKHR( m_hDevice, m_hSwapChain, &nImageCount, m_SwapChainImages.data() ) );
-	SIRENGINE_LOG( "Allocated VKSwapchainKHR Object %u.", i );
-
-	m_nSwapChainFormat = surfaceFormat.format;
-	m_nSwapChainFormat = VK_FORMAT_B8G8R8A8_SRGB;
-	m_nSwapChainExtent = extent;
-
-	m_SwapChainImageViews.resize( m_SwapChainImages.size() );
-
-	for ( i = 0; i < m_SwapChainImages.size(); i++ ) {
-		VkImageViewCreateInfo imageViewInfo;
-		memset( &imageViewInfo, 0, sizeof( imageViewInfo ) );
-		imageViewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-		imageViewInfo.image = m_SwapChainImages[i];
-		imageViewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-		imageViewInfo.format = m_nSwapChainFormat;
-		imageViewInfo.components.r = VK_COMPONENT_SWIZZLE_R;
-		imageViewInfo.components.g = VK_COMPONENT_SWIZZLE_G;
-		imageViewInfo.components.b = VK_COMPONENT_SWIZZLE_B;
-		imageViewInfo.components.a = VK_COMPONENT_SWIZZLE_A;
-		imageViewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-		imageViewInfo.subresourceRange.baseMipLevel = 0;
-		imageViewInfo.subresourceRange.levelCount = 1;
-		imageViewInfo.subresourceRange.baseArrayLayer = 0;
-		imageViewInfo.subresourceRange.layerCount = 1;
-
-		VK_CALL( vkCreateImageView( m_hDevice, &imageViewInfo, &AllocationCallbacks, &m_SwapChainImageViews[i] ) );
-
-		SIRENGINE_LOG( "Allocated SwapChain VkImageView Object %u.", i );
-	}
-
-	m_SwapChainFramebuffers.resize( m_SwapChainImageViews.size() );
-
-	for ( i = 0; i < m_SwapChainFramebuffers.size(); i++ ) {
-		VkImageView szAttachments[] = {
-			m_SwapChainImageViews[i]
-		};
-
-		VkFramebufferCreateInfo framebufferInfo;
-		memset( &framebufferInfo, 0, sizeof( framebufferInfo ) );
-		framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-		framebufferInfo.renderPass = m_hRenderPass;
-		framebufferInfo.attachmentCount = 1;
-		framebufferInfo.pAttachments = szAttachments;
-		framebufferInfo.width = m_ContextData.nWindowWidth;
-		framebufferInfo.height = m_ContextData.nWindowHeight;
-		framebufferInfo.layers = 1;
-
-		VK_CALL( vkCreateFramebuffer( m_hDevice, &framebufferInfo, &AllocationCallbacks, &m_SwapChainFramebuffers[i] ) );
-		SIRENGINE_LOG( "Allocated SwapChain VkFramebuffer Object %u.", i );
-	}
+	SIRENGINE_LOG_LEVEL( VulkanBackend, ELogLevel::Info, "Allocating vulkan swapchain...\n" );
+	VK_CALL( vkCreateSwapchainKHR( m_hDevice, &createInfo, NULL, &m_hSwapChain ) );
+	SIRENGINE_LOG_LEVEL( VulkanBackend, ELogLevel::Info, "Done.\n" );
 }
 
 void VKContext::ShutdownBackend( void )
 {
-	if ( m_hSurface ) {
-		vkDestroySurfaceKHR( m_hInstance, m_hSurface, &AllocationCallbacks );
-	}
-	if ( m_hInstance ) {
-		vkDestroyInstance( m_hInstance, &AllocationCallbacks );
-	}
-	if ( m_hDevice ) {
-		vkDestroyDevice( m_hDevice, &AllocationCallbacks );
-	}
+	vkDestroySwapchainKHR( m_hDevice, m_hSwapChain, NULL );
+	vkDestroySurfaceKHR( m_hInstance, m_hSurface, NULL );
+	vkDestroyDevice( m_hDevice, NULL );
+	vkDestroyInstance( m_hInstance, NULL );
 }
 
 };

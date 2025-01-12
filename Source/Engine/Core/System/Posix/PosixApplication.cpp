@@ -25,6 +25,7 @@ PosixApplication::PosixApplication( void )
 PosixApplication::~PosixApplication()
 {
 	g_bExitApp.store( true );
+	RenderLib::g_pContext->Shutdown();
 	delete RenderLib::g_pContext;
 	g_pConsoleManager->SaveConfig( "config.ini" );
 	CLogManager::ShutdownLogger();
