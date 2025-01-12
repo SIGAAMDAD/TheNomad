@@ -25,6 +25,7 @@ PosixApplication::PosixApplication( void )
 PosixApplication::~PosixApplication()
 {
 	g_bExitApp.store( true );
+	delete RenderLib::g_pContext;
 	g_pConsoleManager->SaveConfig( "config.ini" );
 	CLogManager::ShutdownLogger();
 }
@@ -83,12 +84,13 @@ void PosixApplication::Init( void )
 	contextInfo.nWindowWidth = 1280;
 	contextInfo.nWindowHeight = 720;
 	contextInfo.nAppVersion = SIRENGINE_MAKE_VERSION( 1, 2, 0 );
+	RenderLib::g_pContext = RenderLib::IRenderContext::CreateContext( contextInfo );
 
 	GetCurrentPath();
 
 	g_pFileSystem->Init();
 
-	RenderLib::IRenderContext *pRenderContext = RenderLib::IRenderContext::CreateContext( contextInfo );
+	RenderLib::g_pContext->Init();
 
 	CLogManager::LaunchLoggingThread();
 	g_pConsoleManager->LoadConfig( "config.ini" );

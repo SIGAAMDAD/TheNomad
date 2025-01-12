@@ -20,6 +20,16 @@ CVar<uint32_t> r_RenderAPI(
 	CVG_RENDERER
 );
 
+CVar<int32_t> r_VSync(
+	"vid.VSync",
+	(int32_t)EVSyncMode::Disabled,
+	Cvar_Save,
+	"Sets vertical synchronization mode",
+	CVG_RENDERER
+);
+
+IRenderContext *g_pContext;
+
 SIRENGINE_DEFINE_LOG_CATEGORY( RenderBackend, ELogLevel::Info );
 
 IRenderContext::IRenderContext( void )
@@ -30,18 +40,23 @@ IRenderContext::IRenderContext( void )
 
 IRenderContext::~IRenderContext()
 {
-	if ( m_pWindow ) {
-		SDL_DestroyWindow( m_pWindow );
-	}
-	m_pWindow = NULL;
+	Shutdown();
 }
 
 void IRenderContext::Init( void )
 {
+	SIRENGINE_LOG_LEVEL( RenderBackend, ELogLevel::Info, "Initializing RenderBackend...\n" );
+	if ( !CreateWindow() ) {
+		SIRENGINE_LOG_LEVEL( RenderBackend, ELogLevel::Fatal, "Error creating SDL2 window: %s", SDL_GetError() );
+	}
 }
 
 void IRenderContext::Shutdown( void )
 {
+	if ( m_pWindow ) {
+		SDL_DestroyWindow( m_pWindow );
+	}
+	m_pWindow = NULL;
 }
 
 void IRenderContext::Frame( uint32_t nFrameTic )

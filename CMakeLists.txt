@@ -22,7 +22,7 @@ pkg_check_modules(SDL2 REQUIRED sdl2)
 
 # Include directories
 include_directories(${GTK3_INCLUDE_DIRS} ${PANGO_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS} ${FREETYPE2_INCLUDE_DIRS}
-	Source/ ThirdParty/EASTL/include/ ThirdParty/EABase/include/Common/)
+	Source/ ThirdParty/EASTL/include/ ThirdParty/EABase/include/Common/ ThirdParty/VulkanMemoryAllocator/)
 
 # Link directories
 link_directories(${GTK3_LIBRARY_DIRS} ${PANGO_LIBRARY_DIRS} ${SDL2_LIBRARY_DIRS} ${FREETYPE2_LIBRARY_DIRS})

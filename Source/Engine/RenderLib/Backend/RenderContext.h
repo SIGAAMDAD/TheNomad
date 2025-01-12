@@ -39,6 +39,13 @@ enum class EWindowMode : uint32_t
 	BorderlessFullscreen
 };
 
+enum class EVSyncMode : int32_t
+{
+	Disabled = -1,
+	Adaptive = 0,
+	Enabled = 1
+};
+
 class IRenderContext : public IEngineSystem
 {
 public:
@@ -59,6 +66,8 @@ protected:
 	ContextInfo_t m_ContextData;
 };
 
+extern IRenderContext *g_pContext;
+extern CVar<int32_t> r_VSync;
 extern CVar<uint32_t> r_RenderAPI;
 extern CVar<uint32_t> r_WindowMode;
 

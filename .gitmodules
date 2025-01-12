@@ -19,3 +19,6 @@
 [submodule "ThirdParty/angelscript-mirror"]
 	path = ThirdParty/angelscript-mirror
 	url = https://github.com/codecat/angelscript-mirror.git
+[submodule "ThirdParty/VulkanMemoryAllocator"]
+	path = ThirdParty/VulkanMemoryAllocator
+	url = https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git

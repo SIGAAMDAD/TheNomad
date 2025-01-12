@@ -1,3 +1,4 @@
+#include "../RenderContext.h"
 #include "VulkanContext.h"
 #define VMA_IMPLEMENTATION
 #include <vk_mem_alloc.h>
@@ -111,6 +112,25 @@ namespace SIREngine::RenderLib::Vulkan {
 
 SIRENGINE_DEFINE_LOG_CATEGORY( VulkanBackend, ELogLevel::Info );
 
+typedef struct {
+	VkSurfaceCapabilitiesKHR capabilities;
+	VkSurfaceFormatKHR *pFormats;
+	VkPresentModeKHR *pPresentModes;
+	uint32_t nFormats;
+	uint32_t nPresentModes;
+} SwapChainSupportInfo_t;
+
+typedef struct {
+	bool32 bHasGraphicsFamily;
+	uint32_t nGraphicsFamily;
+	bool32 bHasPresentFamily;
+	uint32_t nPresentFamily;
+
+	bool IsComplete( void ) const {
+		return bHasGraphicsFamily && bHasPresentFamily;
+	}
+} QueueFamilyIndices_t;
+
 static int RateVKDevice( VkPhysicalDevice hDevice )
 {
 	int score;
@@ -160,19 +180,17 @@ static int RateVKDevice( VkPhysicalDevice hDevice )
 	score += deviceProperties.limits.maxVertexInputBindings;
 	score += deviceProperties.limits.maxVertexInputBindingStride;
 
-	// 16-bit shader input required for colors, TODO: make it so that this is
-	// not a required device feature
 	if ( !deviceFeatures.shaderInt16 ) {
-		score = 0;
+		score -= 500;
 	}
 	if ( !deviceFeatures.fullDrawIndexUint32 ) {
-		score = 0;
+		score -= 500;
 	}
-	if ( !deviceFeatures.textureCompressionBC ) {
-		score += 500;
+	if ( deviceFeatures.textureCompressionBC ) {
+		score += 2500;
 	}
-	if ( !deviceFeatures.textureCompressionETC2 ) {
-		score += 500;
+	if ( deviceFeatures.textureCompressionETC2 ) {
+		score += 2500;
 	}
 
 	SIRENGINE_LOG( "VkPhysicalDevice Score: %i", score );
@@ -272,20 +290,41 @@ static void DumpPhysicalDeviceFeatures( VkPhysicalDevice hDevice )
 		deviceProperties.limits.maxVertexOutputComponents );
 }
 
+VKContext *g_pVKContext;
+
+VkAllocationCallbacks VKContext::AllocationCallbacks;
+
+static void *Vulkan_Allocate( void *pUserData, size_t nSize, size_t nAlignment, VkSystemAllocationScope scope )
+{
+	void *pBuffer;
+	pBuffer = malloc( nSize );
+	return pBuffer;
+}
+
+static void Vulkan_Free( void *pUserData, void *pMemory )
+{
+	::free( pMemory );
+}
+
+static void *Vulkan_Reallocate( void *pUserData, void *pOriginal, size_t nSize, size_t nAlignment, VkSystemAllocationScope scope )
+{
+	void *pBuffer;
+	pBuffer = realloc( pOriginal, nSize );
+	return pBuffer;
+}
+
 VKContext::VKContext( const ContextInfo_t& contextInfo )
 	: IRenderContext()
 {
 	m_ContextData = contextInfo;
-	SIRENGINE_LOG_LEVEL( RenderBackend, ELogLevel::Info, "Initializing RenderBackend...\n" );
-	if ( !CreateWindow() ) {
-		SIRENGINE_LOG_LEVEL( RenderBackend, ELogLevel::Fatal, "Error creating SDL2 window: %s", SDL_GetError() );
-	}
 }
 
 bool VKContext::CreateWindow( void )
 {
 	Uint32 flags;
 	uint32_t nBorderMode;
+
+	g_pVKContext = dynamic_cast<VKContext *>( g_pContext );
 
 	flags = SDL_WINDOW_VULKAN;
 	nBorderMode = r_WindowMode.GetValue();
@@ -385,13 +424,136 @@ bool VKContext::CreateWindow( void )
 		debugCreateInfo.pfnUserCallback = debugCallback;
 		debugCreateInfo.pUserData = NULL;
 	}
+
+	InitPhysicalDevice();
+	InitLogicalDevice();
+
 	return true;
+}
+
+QueueFamilyIndices_t FindQueueFamilies( void )
+{
+	QueueFamilyIndices_t indices;
+	uint32_t nQueueFamilyCount;
+	VkQueueFamilyProperties *pQueueProperties;
+
+	memset( &indices, 0, sizeof( indices ) );
+
+	nQueueFamilyCount = 0;
+	vkGetPhysicalDeviceQueueFamilyProperties( g_pVKContext->GetPhysicalDevice(), &nQueueFamilyCount, NULL );
+
+	pQueueProperties = (VkQueueFamilyProperties *)alloca( sizeof( *pQueueProperties ) * nQueueFamilyCount );
+	vkGetPhysicalDeviceQueueFamilyProperties( g_pVKContext->GetPhysicalDevice(), &nQueueFamilyCount, pQueueProperties );
+
+	for ( uint32_t i = 0; i < nQueueFamilyCount; i++ ) {
+		if ( pQueueProperties[i].queueFlags & VK_QUEUE_GRAPHICS_BIT ) {
+			indices.bHasGraphicsFamily = true;
+			indices.nGraphicsFamily = i;
+
+			VkBool32 presentSupport = false;
+			vkGetPhysicalDeviceSurfaceSupportKHR( g_pVKContext->GetPhysicalDevice(), i, g_pVKContext->GetSurface(), &presentSupport );
+			if ( presentSupport ) {
+				indices.bHasPresentFamily = true;
+				indices.nPresentFamily = i;
+			}
+
+			if ( indices.IsComplete() ) {
+				break;
+			}
+		}
+	}
+
+	return indices;
+}
+
+SwapChainSupportInfo_t& QuerySwapChainSupport( void )
+{
+	static SwapChainSupportInfo_t swapChainSupport;
+	uint32_t nFormatCount, nPresentModeCount;
+
+	vkGetPhysicalDeviceSurfaceCapabilitiesKHR( g_pVKContext->GetPhysicalDevice(), g_pVKContext->GetSurface(), &swapChainSupport.capabilities );
+
+	vkGetPhysicalDeviceSurfaceFormatsKHR( g_pVKContext->GetPhysicalDevice(), g_pVKContext->GetSurface(), &nFormatCount, NULL );
+	if ( nFormatCount != 0 ) {
+		static VkSurfaceFormatKHR *formats = (VkSurfaceFormatKHR *)alloca( sizeof( *formats ) * nFormatCount );
+		memset( formats, 0, sizeof( *formats ) * nFormatCount );
+		swapChainSupport.pFormats = formats;
+		swapChainSupport.nFormats = nFormatCount;
+		vkGetPhysicalDeviceSurfaceFormatsKHR( g_pVKContext->GetPhysicalDevice(), g_pVKContext->GetSurface(), &nFormatCount, formats );
+	}
+
+	vkGetPhysicalDeviceSurfacePresentModesKHR( g_pVKContext->GetPhysicalDevice(), g_pVKContext->GetSurface(), &nPresentModeCount, NULL );
+	if ( nPresentModeCount != 0 ) {
+		static VkPresentModeKHR *presentModes = (VkPresentModeKHR *)alloca(
+			sizeof( *presentModes ) * nPresentModeCount );
+		memset( presentModes, 0, sizeof( *presentModes ) * nPresentModeCount );
+		
+		swapChainSupport.pPresentModes = presentModes;
+		swapChainSupport.nPresentModes = nPresentModeCount;
+		vkGetPhysicalDeviceSurfacePresentModesKHR( g_pVKContext->GetPhysicalDevice(), g_pVKContext->GetSurface(), &nPresentModeCount, presentModes );
+	}
+
+	return swapChainSupport;
+}
+
+VkSurfaceFormatKHR ChooseSwapSurfaceFormat( const VkSurfaceFormatKHR *pAvailableFormats,
+	uint32_t nAvailableFormats )
+{
+	for ( uint32_t i = 0; i < nAvailableFormats; i++ ) {
+		if ( pAvailableFormats[i].format == VK_FORMAT_B8G8R8A8_SRGB
+			&& pAvailableFormats[i].colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR )
+		{
+			return pAvailableFormats[i];
+		}
+	}
+
+	return pAvailableFormats[0];
+}
+
+VkPresentModeKHR ChooseSwapPresentMode( const VkPresentModeKHR *pAvailablePresentModes,
+	uint32_t nAvailablePresentModes )
+{
+	VkPresentModeKHR desiredPresentMode;
+
+	switch ( r_VSync.GetValue() ) {
+	case -1:
+		desiredPresentMode = VK_PRESENT_MODE_FIFO_RELAXED_KHR;
+		break;
+	case 0:
+		desiredPresentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
+		break;
+	case 1:
+		desiredPresentMode = VK_PRESENT_MODE_FIFO_KHR;
+		break;
+	};
+
+	for ( uint32_t i = 0; i < nAvailablePresentModes; i++ ) {
+		if ( pAvailablePresentModes[i] == desiredPresentMode ) {
+			return pAvailablePresentModes[i];
+		}
+	}
+
+	return VK_PRESENT_MODE_FIFO_KHR;
+}
+
+VkExtent2D ChooseSwapExtent( const VkSurfaceCapabilitiesKHR& capabilities, uint32_t nWidth, uint32_t nHeight )
+{
+	if ( capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max() ) {
+		return capabilities.currentExtent;
+	} else {
+		VkExtent2D actualExtent = { nWidth, nHeight };
+
+		actualExtent.width = eastl::clamp( actualExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width );
+		actualExtent.height = eastl::clamp( actualExtent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height );
+		
+		return actualExtent;
+	}
 }
 
 void VKContext::InitPhysicalDevice( void )
 {
 	uint32_t nDeviceCount, i;
-	int nDeviceScore;
+	int nDeviceScore, nCurrentScore;
 	VkPhysicalDevice *pDeviceList;
 
 	vkEnumeratePhysicalDevices( m_hInstance, &nDeviceCount, NULL );
@@ -402,15 +564,276 @@ void VKContext::InitPhysicalDevice( void )
 	pDeviceList = (VkPhysicalDevice *)alloca( sizeof( *pDeviceList ) * nDeviceCount );
 	vkEnumeratePhysicalDevices( m_hInstance, &nDeviceCount, pDeviceList );
 
+	nCurrentScore = 0;
 	for ( i = 0; i < nDeviceCount; i++ ) {
 		nDeviceScore = RateVKDevice( pDeviceList[i] );
+
+		if ( nDeviceScore > nCurrentScore ) {
+			m_hPhysicalDevice = pDeviceList[i];
+			nCurrentScore = nDeviceScore;
+		}
+	}
+}
+
+void VKContext::InitLogicalDevice( void )
+{
+	VkDeviceQueueCreateInfo szQueueCreateInfos[2];
+	uint32_t nQueueCreateInfoCount, i;
+	float nQueuePriority;
+	const std::initializer_list<const CString> szRequiredExtensions = {
+		VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+		VK_KHR_VULKAN_MEMORY_MODEL_EXTENSION_NAME,
+		VK_KHR_SHADER_FLOAT_CONTROLS_EXTENSION_NAME,
+		VK_KHR_SPIRV_1_4_EXTENSION_NAME,
+		VK_KHR_GET_MEMORY_REQUIREMENTS_2_EXTENSION_NAME,
+		VK_KHR_PUSH_DESCRIPTOR_EXTENSION_NAME,
+		VK_KHR_MAINTENANCE1_EXTENSION_NAME,
+		VK_KHR_MAINTENANCE2_EXTENSION_NAME,
+		VK_KHR_MAINTENANCE3_EXTENSION_NAME,
+		VK_KHR_DESCRIPTOR_UPDATE_TEMPLATE_EXTENSION_NAME,
+		VK_KHR_16BIT_STORAGE_EXTENSION_NAME,
+		VK_KHR_STORAGE_BUFFER_STORAGE_CLASS_EXTENSION_NAME,
+		VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME,
+		VK_EXT_MEMORY_BUDGET_EXTENSION_NAME,
+		VK_EXT_PAGEABLE_DEVICE_LOCAL_MEMORY_EXTENSION_NAME,
+		VK_EXT_DEBUG_UTILS_EXTENSION_NAME,
+		VK_EXT_VALIDATION_FEATURES_EXTENSION_NAME,
+		VK_EXT_MEMORY_PRIORITY_EXTENSION_NAME,
+	};
+	const char *szLayers[] = {
+		"VK_LAYER_KHRONOS_validation"
+	};
+	const VkValidationFeatureEnableEXT szEnabledValidationFeatures[] = {
+		VK_VALIDATION_FEATURE_ENABLE_BEST_PRACTICES_EXT,
+		VK_VALIDATION_FEATURE_ENABLE_SYNCHRONIZATION_VALIDATION_EXT,
+	};
+	uint32_t nUsedExtensions;
+	VkExtensionProperties *pExtensionList;
+	const char **pUsedExtensions;
+	uint32_t nActualExtensions;
+
+	const QueueFamilyIndices_t indices = FindQueueFamilies();
+	const uint32_t szUniqueQueueFamilies[] = { indices.nGraphicsFamily, indices.nPresentFamily };
+
+	nQueuePriority = 1.0f;
+	memset( szQueueCreateInfos, 0, sizeof( szQueueCreateInfos ) );
+	for ( i = 0; i < SIREngine_StaticArrayLength( szUniqueQueueFamilies ); i++ ) {
+		szQueueCreateInfos[i].sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+		szQueueCreateInfos[i].queueFamilyIndex = szUniqueQueueFamilies[i];
+		szQueueCreateInfos[i].queueCount = 1;
+		szQueueCreateInfos[i].pQueuePriorities = &nQueuePriority;
+	}
+
+	vkEnumerateDeviceExtensionProperties( m_hPhysicalDevice, NULL, &nUsedExtensions, NULL );
+	pExtensionList = (VkExtensionProperties *)alloca( sizeof( *pExtensionList ) * nUsedExtensions );
+	memset( pExtensionList, 0, sizeof( *pExtensionList ) * nUsedExtensions );
+	vkEnumerateDeviceExtensionProperties( m_hPhysicalDevice, NULL, &nUsedExtensions, pExtensionList );
+	
+	pUsedExtensions = (const char **)alloca( sizeof( *pUsedExtensions ) * szRequiredExtensions.size() );
+	nActualExtensions = 0;
+	for ( i = 0; i < nUsedExtensions; i++ ) {
+		if ( eastl::find( szRequiredExtensions.begin(), szRequiredExtensions.end(),
+			pExtensionList[i].extensionName ) != szRequiredExtensions.end() )
+		{
+			pUsedExtensions[ nActualExtensions ] = pExtensionList[i].extensionName;
+			nActualExtensions++;
+			SIRENGINE_LOG_LEVEL( VulkanBackend, ELogLevel::Info, "Using Vulkan Extension \"%s\"", pExtensionList[i].extensionName );
+		}
+	}
+
+	VkDeviceQueueCreateInfo queueCreateInfo;
+	memset( &queueCreateInfo, 0, sizeof( queueCreateInfo ) );
+	queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+	queueCreateInfo.queueFamilyIndex = indices.nGraphicsFamily;
+	queueCreateInfo.queueCount = 1;
+	queueCreateInfo.pQueuePriorities = &nQueuePriority;
+
+	VkValidationFeaturesEXT enabledFeatures;
+	memset( &enabledFeatures, 0, sizeof( enabledFeatures ) );
+	enabledFeatures.sType = VK_STRUCTURE_TYPE_VALIDATION_FEATURES_EXT;
+	enabledFeatures.enabledValidationFeatureCount = SIREngine_StaticArrayLength( szEnabledValidationFeatures );
+	enabledFeatures.pEnabledValidationFeatures = szEnabledValidationFeatures;
+
+	VkPhysicalDevice16BitStorageFeaturesKHR deviceFeatures16Bit;
+	memset( &deviceFeatures16Bit, 0, sizeof( deviceFeatures16Bit ) );
+	deviceFeatures16Bit.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_16BIT_STORAGE_FEATURES_KHR;
+	deviceFeatures16Bit.storageInputOutput16 = VK_FALSE;
+	
+	VkPhysicalDeviceFeatures2KHR deviceFeatures;
+	memset( &deviceFeatures, 0, sizeof( deviceFeatures ) );
+	deviceFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2_KHR;
+	deviceFeatures.features.samplerAnisotropy = VK_TRUE;
+	deviceFeatures.features.fullDrawIndexUint32 = VK_TRUE;
+	deviceFeatures.features.shaderInt16 = VK_TRUE;
+	deviceFeatures.pNext = &deviceFeatures16Bit;
+
+	VkDeviceCreateInfo createInfo;
+	memset( &createInfo, 0, sizeof( createInfo ) );
+	createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+
+	createInfo.queueCreateInfoCount = 1; // segfaults in glcore if set to 2
+	createInfo.pQueueCreateInfos = szQueueCreateInfos;
+
+	createInfo.pNext = &deviceFeatures;
+
+	createInfo.enabledExtensionCount = nActualExtensions;
+	createInfo.ppEnabledExtensionNames = pUsedExtensions;
+
+	createInfo.enabledLayerCount = SIREngine_StaticArrayLength( szLayers );
+	createInfo.ppEnabledLayerNames = szLayers;
+
+	VK_CALL( vkCreateDevice( m_hPhysicalDevice, &createInfo, NULL, &m_hDevice ) );
+
+	vkGetDeviceQueue( m_hDevice, indices.nGraphicsFamily, 0, &m_hGraphicsQueue );
+
+	{
+		VmaAllocatorCreateInfo allocatorInfo;
+		memset( &allocatorInfo, 0, sizeof( allocatorInfo ) );
+		allocatorInfo.device = m_hDevice;
+		allocatorInfo.instance = m_hInstance;
+		allocatorInfo.physicalDevice = m_hPhysicalDevice;
+		allocatorInfo.preferredLargeHeapBlockSize = 128ull * 1024 * 1024;
+		{
+			static VmaVulkanFunctions funcProcs;
+			funcProcs.vkAllocateMemory =
+				(PFN_vkAllocateMemory)vkGetDeviceProcAddr( m_hDevice, "vkAllocateMemory" );
+			funcProcs.vkBindBufferMemory2KHR =
+				(PFN_vkBindBufferMemory2KHR)vkGetDeviceProcAddr( m_hDevice, "vkBindBufferMemory2KHR" );
+			funcProcs.vkBindImageMemory2KHR =
+				(PFN_vkBindImageMemory2KHR)vkGetDeviceProcAddr( m_hDevice, "vkBindImageMemory2KHR" );
+			funcProcs.vkGetBufferMemoryRequirements2KHR =
+				(PFN_vkGetBufferMemoryRequirements2KHR)vkGetDeviceProcAddr( m_hDevice, "vkGetBufferMemoryRequirements2KHR" );
+			funcProcs.vkGetImageMemoryRequirements2KHR =
+				(PFN_vkGetImageMemoryRequirements2KHR)vkGetDeviceProcAddr( m_hDevice, "vkGetImageMemoryRequirements2KHR" );
+
+			allocatorInfo.pVulkanFunctions = &funcProcs;
+		}
+		allocatorInfo.flags = VMA_ALLOCATOR_CREATE_KHR_DEDICATED_ALLOCATION_BIT;
+	
+		VK_CALL( vmaCreateAllocator( &allocatorInfo, &m_hAllocator ) );
+
+		AllocationCallbacks.pfnAllocation = Vulkan_Allocate;
+		AllocationCallbacks.pfnFree = Vulkan_Free;
+		AllocationCallbacks.pfnReallocation = Vulkan_Reallocate;
+	}
+}
+
+void VKContext::InitSwapChain( void )
+{
+	VkSurfaceFormatKHR surfaceFormat;
+	VkPresentModeKHR presentMode;
+	VkExtent2D extent;
+	uint32_t nImageCount, i;
+	QueueFamilyIndices_t queueIndices;
+
+	const SwapChainSupportInfo_t& swapChainSupport = QuerySwapChainSupport();
+	surfaceFormat = ChooseSwapSurfaceFormat( swapChainSupport.pFormats, swapChainSupport.nFormats );
+	presentMode = ChooseSwapPresentMode( swapChainSupport.pPresentModes, swapChainSupport.nPresentModes );
+	extent = ChooseSwapExtent( swapChainSupport.capabilities,
+		m_ContextData.nWindowWidth, m_ContextData.nWindowHeight );
+
+	nImageCount = swapChainSupport.capabilities.minImageCount + 1;
+	if ( swapChainSupport.capabilities.maxImageCount > 0 && nImageCount > swapChainSupport.capabilities.maxImageCount ) {
+		nImageCount = swapChainSupport.capabilities.maxImageCount;
+	}
+
+	VkSwapchainCreateInfoKHR createInfo;
+	memset( &createInfo, 0, sizeof( createInfo ) );
+	createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+	createInfo.surface = GetSurface();
+	createInfo.minImageCount = nImageCount;
+	createInfo.imageFormat = surfaceFormat.format;
+	createInfo.imageColorSpace = surfaceFormat.colorSpace;
+	createInfo.imageExtent = extent;
+	createInfo.imageArrayLayers = 1;
+	createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+
+	queueIndices = FindQueueFamilies();
+	const bool32 queueFamilyIndices[] = {
+		queueIndices.bHasGraphicsFamily, queueIndices.bHasPresentFamily
+	};
+
+	if ( queueIndices.nGraphicsFamily != queueIndices.nPresentFamily ) {
+		createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
+		createInfo.queueFamilyIndexCount = 2;
+		createInfo.pQueueFamilyIndices = queueFamilyIndices;
+	} else {
+		createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+	}
+
+	createInfo.preTransform = swapChainSupport.capabilities.currentTransform;
+	createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+	createInfo.presentMode = presentMode;
+	createInfo.clipped = VK_TRUE;
+	createInfo.oldSwapchain = VK_NULL_HANDLE;
+
+	VK_CALL( fn_vkCreateSwapchainKHR( m_hDevice, &createInfo, &AllocationCallbacks, &m_hSwapChain ) );
+
+	VK_CALL( vkGetSwapchainImagesKHR( m_hDevice, m_hSwapChain, &nImageCount, NULL ) );
+	m_SwapChainImages.resize( nImageCount );
+	VK_CALL( vkGetSwapchainImagesKHR( m_hDevice, m_hSwapChain, &nImageCount, m_SwapChainImages.data() ) );
+	SIRENGINE_LOG( "Allocated VKSwapchainKHR Object %u.", i );
+
+	m_nSwapChainFormat = surfaceFormat.format;
+	m_nSwapChainFormat = VK_FORMAT_B8G8R8A8_SRGB;
+	m_nSwapChainExtent = extent;
+
+	m_SwapChainImageViews.resize( m_SwapChainImages.size() );
+
+	for ( i = 0; i < m_SwapChainImages.size(); i++ ) {
+		VkImageViewCreateInfo imageViewInfo;
+		memset( &imageViewInfo, 0, sizeof( imageViewInfo ) );
+		imageViewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+		imageViewInfo.image = m_SwapChainImages[i];
+		imageViewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+		imageViewInfo.format = m_nSwapChainFormat;
+		imageViewInfo.components.r = VK_COMPONENT_SWIZZLE_R;
+		imageViewInfo.components.g = VK_COMPONENT_SWIZZLE_G;
+		imageViewInfo.components.b = VK_COMPONENT_SWIZZLE_B;
+		imageViewInfo.components.a = VK_COMPONENT_SWIZZLE_A;
+		imageViewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		imageViewInfo.subresourceRange.baseMipLevel = 0;
+		imageViewInfo.subresourceRange.levelCount = 1;
+		imageViewInfo.subresourceRange.baseArrayLayer = 0;
+		imageViewInfo.subresourceRange.layerCount = 1;
+
+		VK_CALL( vkCreateImageView( m_hDevice, &imageViewInfo, &AllocationCallbacks, &m_SwapChainImageViews[i] ) );
+
+		SIRENGINE_LOG( "Allocated SwapChain VkImageView Object %u.", i );
+	}
+
+	m_SwapChainFramebuffers.resize( m_SwapChainImageViews.size() );
+
+	for ( i = 0; i < m_SwapChainFramebuffers.size(); i++ ) {
+		VkImageView szAttachments[] = {
+			m_SwapChainImageViews[i]
+		};
+
+		VkFramebufferCreateInfo framebufferInfo;
+		memset( &framebufferInfo, 0, sizeof( framebufferInfo ) );
+		framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+		framebufferInfo.renderPass = m_hRenderPass;
+		framebufferInfo.attachmentCount = 1;
+		framebufferInfo.pAttachments = szAttachments;
+		framebufferInfo.width = m_ContextData.nWindowWidth;
+		framebufferInfo.height = m_ContextData.nWindowHeight;
+		framebufferInfo.layers = 1;
+
+		VK_CALL( vkCreateFramebuffer( m_hDevice, &framebufferInfo, &AllocationCallbacks, &m_SwapChainFramebuffers[i] ) );
+		SIRENGINE_LOG( "Allocated SwapChain VkFramebuffer Object %u.", i );
 	}
 }
 
 void VKContext::ShutdownBackend( void )
 {
+	if ( m_hSurface ) {
+		vkDestroySurfaceKHR( m_hInstance, m_hSurface, &AllocationCallbacks );
+	}
 	if ( m_hInstance ) {
-		vkDestroyInstance( m_hInstance, NULL );
+		vkDestroyInstance( m_hInstance, &AllocationCallbacks );
+	}
+	if ( m_hDevice ) {
+		vkDestroyDevice( m_hDevice, &AllocationCallbacks );
 	}
 }
 
