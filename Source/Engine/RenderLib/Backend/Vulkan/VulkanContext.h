@@ -35,6 +35,9 @@ private:
 	void InitCommandBuffer( void );
 	void InitSyncObjects( void );
 	void CreateFixedFunctionPipeline( void );
+	void RecreateSwapChain( void );
+	
+	void InitializeAntiAliasing( void );
 
 	void RecordCommandBuffer( VkCommandBuffer hCommandBuffer, uint32_t nImageIndex );
 

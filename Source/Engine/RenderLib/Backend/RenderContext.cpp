@@ -8,7 +8,7 @@ CVar<uint32_t> vid_WindowMode(
 	"vid.WindowMode",
 	(uint32_t)EWindowMode::Windowed,
 	Cvar_Save,
-	"Sets the engine's window mode",
+	"Sets the engine's window mode.",
 	CVG_RENDERER
 );
 
@@ -16,7 +16,7 @@ CVar<uint32_t> vid_RenderAPI(
 	"vid.RenderAPI",
 	(uint32_t)ERenderAPI::Vulkan,
 	Cvar_Save,
-	"Sets the engine's rendering api",
+	"Sets the engine's rendering api.",
 	CVG_RENDERER
 );
 
@@ -24,7 +24,23 @@ CVar<int32_t> vid_VSync(
 	"vid.VSync",
 	(int32_t)EVSyncMode::Disabled,
 	Cvar_Save,
-	"Sets vertical synchronization mode",
+	"Sets vertical synchronization mode.",
+	CVG_RENDERER
+);
+
+CVar<uint32_t> r_AntiAliasType(
+	"r.AntiAliasType",
+	(uint32_t)EAntiAliasType::None,
+	Cvar_Save,
+	"Sets the type of antialiasing used in the rendering engine.",
+	CVG_RENDERER
+);
+
+CVar<uint32_t> r_AntiAliasQuality(
+	"r.AntiAliasQuality",
+	0,
+	Cvar_Save,
+	"Sets the quality of antialiasing.",
 	CVG_RENDERER
 );
 
@@ -45,6 +61,9 @@ void IRenderContext::RegisterCvars( void )
 	vid_WindowMode.Register();
 	vid_RenderAPI.Register();
 	vid_VSync.Register();
+
+	r_AntiAliasType.Register();
+	r_AntiAliasQuality.Register();
 
 	RegisterBackendCvars();
 }

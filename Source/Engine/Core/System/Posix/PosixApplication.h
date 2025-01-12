@@ -35,6 +35,8 @@ typedef enum {
 	DT_OK_CANCEL
 } dialogType_t;
 
+dialogResult_t Sys_Dialog( dialogType_t type, const char *message, const char *title );
+
 };
 
 #endif

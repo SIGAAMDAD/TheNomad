@@ -4,6 +4,9 @@
 #include <vk_mem_alloc.h>
 #include <Engine/Core/Util.h>
 #include "VulkanShader.h"
+#include <nvsdk_ngx.h>
+#include <nvsdk_ngx_vk.h>
+#include <nvsdk_ngx_helpers_vk.h>
 
 PFN_vkCreateSwapchainKHR fn_vkCreateSwapchainKHR = NULL;
 PFN_vkCmdPushDescriptorSetKHR fn_vkCmdPushDescriptorSetKHR = NULL;
@@ -113,7 +116,6 @@ namespace SIREngine::RenderLib::Vulkan {
 
 SIRENGINE_DEFINE_LOG_CATEGORY( VulkanBackend, ELogLevel::Info );
 
-static VKShader s_GenericShader;
 
 typedef struct {
 	VkSurfaceCapabilitiesKHR capabilities;
@@ -905,7 +907,8 @@ void VKContext::CreateFixedFunctionPipeline( void )
 	pipelineLayoutInfo.pushConstantRangeCount = 0; // Optional
 	pipelineLayoutInfo.pPushConstantRanges = NULL; // Optional
 
-	if ( !s_GenericShader.Compile( "Generic" ) ) {
+	VKShader Generic;
+	if ( !Generic.Compile( "Generic" ) ) {
 		SIRENGINE_LOG_LEVEL( VulkanBackend, ELogLevel::Fatal, "Error compiling vulkan shader!" );
 	}
 
@@ -913,14 +916,14 @@ void VKContext::CreateFixedFunctionPipeline( void )
 	memset( &vertexInfo, 0, sizeof( vertexInfo ) );
 	vertexInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 	vertexInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
-	vertexInfo.module = s_GenericShader.GetVertexModule();
+	vertexInfo.module = Generic.GetVertexModule();
 	vertexInfo.pName = "main";
 
 	VkPipelineShaderStageCreateInfo fragmentInfo;
 	memset( &fragmentInfo, 0, sizeof( fragmentInfo ) );
 	fragmentInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 	fragmentInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-	fragmentInfo.module = s_GenericShader.GetFragmentModule();
+	fragmentInfo.module = Generic.GetFragmentModule();
 	fragmentInfo.pName = "main";
 
 	VkPipelineShaderStageCreateInfo shaderStages[] = {
@@ -1083,10 +1086,23 @@ void VKContext::InitSyncObjects( void )
 
 void VKContext::BeginFrame( void )
 {
-	vkWaitForFences( m_hDevice, 1, &m_hInFlightFences[ m_nCurrentFrame ], VK_TRUE, SIRENGINE_UINT64_MAX );
-	vkResetFences( m_hDevice, 1, &m_hInFlightFences[ m_nCurrentFrame ] );
+	if ( System::g_bExitApp.load() ) {
+		return;
+	}
 
-	vkAcquireNextImageKHR( m_hDevice, m_hSwapChain, SIRENGINE_UINT64_MAX, m_hImageAvailableSemaphore[ m_nCurrentFrame ], VK_NULL_HANDLE, &m_nImageIndex );
+	vkWaitForFences( m_hDevice, 1, &m_hInFlightFences[ m_nCurrentFrame ], VK_TRUE, SIRENGINE_UINT64_MAX );
+
+	VkResult result = vkAcquireNextImageKHR( m_hDevice, m_hSwapChain, SIRENGINE_UINT64_MAX,
+		m_hImageAvailableSemaphore[ m_nCurrentFrame ], VK_NULL_HANDLE, &m_nImageIndex );
+	
+	if ( result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR ) {
+		RecreateSwapChain();
+		return;
+	} else if ( result != VK_SUCCESS ) {
+		SIRENGINE_LOG_LEVEL( VulkanBackend, ELogLevel::Error, "Failed to acquire vulkan swap chain image" );
+	}
+
+	vkResetFences( m_hDevice, 1, &m_hInFlightFences[ m_nCurrentFrame ] );
 
 	vkResetCommandBuffer( m_hCommandBuffers[ m_nCurrentFrame ], 0 );
 	RecordCommandBuffer( m_hCommandBuffers[ m_nCurrentFrame ], m_nImageIndex );
@@ -1094,6 +1110,10 @@ void VKContext::BeginFrame( void )
 
 void VKContext::EndFrame( void )
 {
+	if ( System::g_bExitApp.load() ) {
+		return;
+	}
+
 	VkSubmitInfo submitInfo;
 	memset( &submitInfo, 0, sizeof( submitInfo ) );
 	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -1177,6 +1197,24 @@ void VKContext::RecordCommandBuffer( VkCommandBuffer hCommandBuffer, uint32_t nI
 	VK_CALL( vkEndCommandBuffer( hCommandBuffer ) );
 }
 
+void VKContext::RecreateSwapChain( void )
+{
+	vkDeviceWaitIdle( m_hDevice );
+
+	// cleanup first
+	{
+		for ( auto& it : m_SwapChainFramebuffers ) {
+			vkDestroyFramebuffer( m_hDevice, it, NULL );
+		}
+		for ( auto& it : m_SwapChainImageViews ) {
+			vkDestroyImageView( m_hDevice, it, NULL );
+		}
+		vkDestroySwapchainKHR( m_hDevice, m_hSwapChain, NULL );
+	}
+
+	InitSwapChain();
+}
+
 void VKContext::ShutdownBackend( void )
 {
 	vkDeviceWaitIdle( m_hDevice );
@@ -1184,8 +1222,8 @@ void VKContext::ShutdownBackend( void )
 	vkDestroyPipeline( m_hDevice, m_hPipeline, NULL );
 	for ( uint32_t i = 0; i < VK_MAX_FRAMES_IN_FLIGHT; i++ ) {
 		vkDestroySemaphore( m_hDevice, m_hImageAvailableSemaphore[i], NULL );
-	vkDestroySemaphore( m_hDevice, m_hRenderFinishedSemaphore[i], NULL );
-	vkDestroyFence( m_hDevice, m_hInFlightFences[i], NULL );
+		vkDestroySemaphore( m_hDevice, m_hRenderFinishedSemaphore[i], NULL );
+		vkDestroyFence( m_hDevice, m_hInFlightFences[i], NULL );
 	}
 	vkDestroyCommandPool( m_hDevice, m_hCommandPool, NULL );
 	for ( auto& it : m_SwapChainFramebuffers ) {
@@ -1202,6 +1240,25 @@ void VKContext::ShutdownBackend( void )
 	vkDestroyInstance( m_hInstance, NULL );
 
 	SDL_Vulkan_UnloadLibrary();
+}
+
+void VKContext::InitializeAntiAliasing( void )
+{
+	if ( r_AntiAliasType.GetValue() == (uint32_t)EAntiAliasType::DLSS ) {
+		NVSDK_NGX_Result status = NVSDK_NGX_VULKAN_Init_with_ProjectID( m_ContextData.pszWindowName, NVSDK_NGX_ENGINE_TYPE_CUSTOM,
+			SIRENGINE_VERSION_STRING, L"Resources/", m_hInstance, m_hPhysicalDevice, m_hDevice, vkGetInstanceProcAddr, vkGetDeviceProcAddr,
+			NULL );
+		
+		switch ( status ) {
+		case NVSDK_NGX_Result_FAIL_InvalidParameter:
+		case NVSDK_NGX_Result_FAIL_OutOfGPUMemory:
+			break;
+		case NVSDK_NGX_Result_Success:
+		default:
+			SIRENGINE_LOG_LEVEL( VulkanBackend, ELogLevel::Info, "Initialized DLSS vulkan instance." );
+			break;
+		};
+	}
 }
 
 };

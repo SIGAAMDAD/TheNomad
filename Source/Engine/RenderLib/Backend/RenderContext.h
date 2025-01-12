@@ -46,6 +46,39 @@ enum class EVSyncMode : int32_t
 	Enabled = 1
 };
 
+enum class EAntiAliasType : uint32_t
+{
+	None,
+
+	FXAA,
+	MSAA,
+	SSAA,
+	TSAA,
+	SMAA,
+	DLSS
+};
+
+enum class Detail : uint32_t
+{
+	Lowest,
+	Low,
+	Normal,
+	High,
+	VeryHigh,
+	GPUvsGod
+};
+
+enum class TextureFilterMode : uint32_t
+{
+	Bilinear,
+	Nearest,
+	Trilinear,
+	Anisotropic2X,
+	Anisotropic4X,
+	Anisotropic8X,
+	Anisotropic16X
+};
+
 class IRenderContext : public IEngineSystem
 {
 public:
@@ -72,6 +105,12 @@ protected:
 };
 
 extern IRenderContext *g_pContext;
+
+extern CVar<uint32_t> r_AntiAliasType;
+extern CVar<uint32_t> r_AntiAliasQuality;
+extern CVar<uint32_t> r_TextureDetail;
+extern CVar<uint32_t> r_TextureFiltering;
+
 extern CVar<int32_t> vid_VSync;
 extern CVar<uint32_t> vid_RenderAPI;
 extern CVar<uint32_t> vid_WindowMode;

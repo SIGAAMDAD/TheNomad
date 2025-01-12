@@ -23,7 +23,7 @@ pkg_check_modules(SDL2 REQUIRED sdl2)
 # Include directories
 include_directories(${GTK3_INCLUDE_DIRS} ${PANGO_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS} ${FREETYPE2_INCLUDE_DIRS}
 	Source/ ThirdParty/EASTL/include/ ThirdParty/EABase/include/Common/ ThirdParty/VulkanMemoryAllocator/ ThirdParty/glm/
-	ThirdParty/json/single_include/)
+	ThirdParty/json/single_include/ ThirdParty/DLSS/include/ ThirdParty/Streamline/include/)
 
 # Link directories
 link_directories(${GTK3_LIBRARY_DIRS} ${PANGO_LIBRARY_DIRS} ${SDL2_LIBRARY_DIRS} ${FREETYPE2_LIBRARY_DIRS})
@@ -99,6 +99,7 @@ target_link_libraries(TheNomad.x64
 	-lGL
 	-lvulkan
 	${CMAKE_SOURCE_DIR}/libEASTL.a
+	${CMAKE_SOURCE_DIR}/ThirdParty/DLSS/lib/Linux_x86_64/libnvsdk_ngx.a
 	-lbacktrace
 	-lfreetype
 	-lSDL2

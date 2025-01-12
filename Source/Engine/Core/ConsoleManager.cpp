@@ -493,10 +493,27 @@ void CConsoleManager::SaveConfig( const CFilePath& filePath ) const
 		}
 		SIRENGINE_LOG( "\"%s\" = \"%s\"", pCvar->GetName().c_str(), pCvar->GetStringValue().c_str() );
 
-		data[ GetConfigSectionName( pCvar->GetGroup() ) ][ pCvar->GetName() ] = pCvar->GetStringValue();
+		switch ( pCvar->GetType() ) {
+		case CvarType_Bool:
+			data[ GetConfigSectionName( pCvar->GetGroup() ) ][ pCvar->GetName() ] = dynamic_cast<CVar<bool> *>( pCvar )->GetValue();
+			break;
+		case CvarType_Int:
+			data[ GetConfigSectionName( pCvar->GetGroup() ) ][ pCvar->GetName() ] = dynamic_cast<CVar<int32_t> *>( pCvar )->GetValue();
+			break;
+		case CvarType_UInt:
+			data[ GetConfigSectionName( pCvar->GetGroup() ) ][ pCvar->GetName() ] = dynamic_cast<CVar<uint32_t> *>( pCvar )->GetValue();
+			break;
+		case CvarType_Float:
+			data[ GetConfigSectionName( pCvar->GetGroup() ) ][ pCvar->GetName() ] = dynamic_cast<CVar<float> *>( pCvar )->GetValue();
+			break;
+		case CvarType_FilePath:
+		case CvarType_String:
+			data[ GetConfigSectionName( pCvar->GetGroup() ) ][ pCvar->GetName() ] = pCvar->GetStringValue();
+			break;
+		};
 	}
 
-	const CString& buffer = eastl::move( data.dump( 1, '\t' ) );
+	const CString& buffer = data.dump( 1, '\t' );
 
 	CFileWriter writer( filePath );
 	if ( !writer.Write( buffer.data(), buffer.size() ) ) {

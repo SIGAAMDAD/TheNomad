@@ -11,6 +11,7 @@
 #include <errno.h>
 #include <libgen.h>
 #include <dirent.h>
+#include <signal.h>
 
 namespace SIREngine::System {
 
@@ -23,7 +24,6 @@ SIRENGINE_DEFINE_LOG_CATEGORY( System, ELogLevel::Info );
 
 extern "C" void InitCrashHandler( void );
 extern "C" void DumpStacktrace( void );
-dialogResult_t Sys_Dialog( dialogType_t type, const char *message, const char *title );
 
 PosixApplication::PosixApplication( void )
 {
@@ -32,7 +32,7 @@ PosixApplication::PosixApplication( void )
 PosixApplication::~PosixApplication()
 {
 	g_bExitApp.store( true );
-	g_pConsoleManager->SaveConfig( "config.ini" );
+	g_pConsoleManager->SaveConfig( "Config/config.json" );
 	Events::g_pEventManager->Shutdown();
 	RenderLib::g_pContext->Shutdown();
 	delete RenderLib::g_pContext;
@@ -42,8 +42,12 @@ PosixApplication::~PosixApplication()
 
 void PosixApplication::Run( void )
 {
-	while ( 1 ) {
+	while ( !g_bExitApp.load() ) {
 		Events::g_pEventManager->Frame( 0 );
+		if ( g_bExitApp.load() ) {
+			continue;
+		}
+
 		RenderLib::g_pContext->BeginFrame();
 
 		RenderLib::g_pContext->EndFrame();
@@ -55,7 +59,6 @@ void Error( const char *pError )
 	FileWrite( pError, strlen( pError ), SIRENGINE_STDERR_HANDLE );
 
 	DumpStacktrace();
-	Sys_Dialog( DT_ERROR, "Engine Error", pError );
 	delete g_pApplication;
 
 	_Exit( EXIT_FAILURE );
@@ -94,6 +97,18 @@ const CFilePath& GetCurrentPath( void )
 	return CurrentPath;
 }
 
+static void Catch_Signal( int signum )
+{
+	SIRENGINE_LOG_LEVEL( System, ELogLevel::Info, "Caught signal %i from system", signum );
+	switch ( signum ) {
+	case SIGINT:
+	case SIGKILL:
+	case SIGSTOP:
+		g_bExitApp.store( true );
+		break;
+	};
+}
+
 void PosixApplication::Init( void )
 {
 	g_bExitApp.store( false );
@@ -119,6 +134,10 @@ void PosixApplication::Init( void )
 	RenderLib::g_pContext = RenderLib::IRenderContext::CreateContext( contextInfo );
 
 	GetCurrentPath();
+
+	signal( SIGKILL, Catch_Signal );
+	signal( SIGINT, Catch_Signal );
+	signal( SIGSTOP, Catch_Signal );
 
 	// initialize the filesystem first so that we can open a logfile
 	g_pFileSystem->Init();

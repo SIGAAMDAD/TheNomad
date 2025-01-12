@@ -28,3 +28,9 @@
 [submodule "ThirdParty/json"]
 	path = ThirdParty/json
 	url = https://github.com/nlohmann/json.git
+[submodule "ThirdParty/DLSS"]
+	path = ThirdParty/DLSS
+	url = https://github.com/NVIDIA/DLSS.git
+[submodule "ThirdParty/Streamline"]
+	path = ThirdParty/Streamline
+	url = https://github.com/NVIDIAGameWorks/Streamline.git
