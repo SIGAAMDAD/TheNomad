@@ -12,8 +12,10 @@ namespace SIREngine {
 class IEngineInterface
 {
 public:
-	IEngineInterface( void );
-	~IEngineInterface();
+	IEngineInterface( void )
+	{ }
+	virtual ~IEngineInterface()
+	{ }
 
 	virtual void Init( void ) = 0;
 	virtual void Shutdown( void ) = 0;

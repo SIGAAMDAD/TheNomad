@@ -8,8 +8,12 @@
 #include <Engine/Core/Pch.h>
 #include <Engine/Core/Types.h>
 #include <Engine/Core/ThreadSystem/Threads.h>
+#include <Engine/Core/FileSystem/FileSystem.h>
+#include <Engine/Core/EngineInterface.h>
 
 namespace SIREngine::System {
+
+typedef void* FileHandle_t;
 
 class IGenericApplication
 {
@@ -19,8 +23,13 @@ public:
 
 	virtual void Init( void ) = 0;
 	virtual void Run( void ) = 0;
-private:
 };
+
+bool CreateDirectory( const char *pDirectory );
+size_t FileWrite( const void *pBuffer, size_t nBytes, FileHandle_t hFile );
+size_t FileRead( void *pBuffer, size_t nBytes, FileHandle_t hFile );
+const CFilePath& GetCurrentPath( void );
+eastl::vector<CFilePath> ListFiles( const CFilePath& directory, bool bDirectoryOnly );
 
 extern IGenericApplication *g_pApplication;
 extern CThreadAtomic<bool> g_bExitApp;

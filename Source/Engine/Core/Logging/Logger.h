@@ -5,8 +5,9 @@
 	#pragma once
 #endif
 
+#include <Engine/Core/Types.h>
+#include <Engine/Core/Compiler.h>
 #include <stdint.h>
-#include "../Core.h"
 #include <EASTL/queue.h>
 
 namespace ELogLevel {

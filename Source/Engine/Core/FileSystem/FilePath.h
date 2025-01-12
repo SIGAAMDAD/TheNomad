@@ -5,11 +5,12 @@
 	#pragma once
 #endif
 
-#include "Pch.h"
+#include <Engine/Core/Pch.h>
+#include <Engine/Core/Compiler.h>
 
 namespace SIREngine {
 
-typedef eastl::fixed_string<char, MAX_OSPATH> CFilePath;
+typedef eastl::fixed_string<char, SIRENGINE_MAX_OSPATH> CFilePath;
 
 };
 

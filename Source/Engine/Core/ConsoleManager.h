@@ -98,14 +98,11 @@ namespace SIREngine {
 		void RegisterConsoleCommand( IConsoleCmd *pCommand );
 		IConsoleCmd *GetConsoleCommand( const CString& commandName );
 
-		void LoadConfig( const FileSystem::CFilePath& filePath );
-		void SaveConfig( const FileSystem::CFilePath& filePath ) const;
+		void LoadConfig( const CFilePath& filePath );
+		void SaveConfig( const CFilePath& filePath ) const;
 
 		void ExecuteCommand( const char *pText );
 		void CommandCompletion( void );
-
-		SIRENGINE_FORCEINLINE static CConsoleManager& Get( void )
-		{ return g_ConsoleManager; }
 	private:
 		const char *SkipWhitespace( const char *pText );
 
@@ -122,9 +119,9 @@ namespace SIREngine {
 
 		const char *m_pSavedLocale;
 		Serialization::CIniSerializer *m_pConfigLoader;
-
-		static CConsoleManager g_ConsoleManager;
 	};
+
+	extern CConsoleManager *g_pConsoleManager;
 
 	class IConsoleVar : public IConsoleObject
 	{
@@ -160,7 +157,7 @@ namespace SIREngine {
 		virtual void SetValue( float nValue ) {}
 		virtual void SetValue( bool bValue ) {}
 		virtual void SetValue( const CString& value ) {}
-		virtual void SetValue( const FileSystem::CFilePath& value ) {}
+		virtual void SetValue( const CFilePath& value ) {}
 	protected:
 		CString m_Name;
 		CString m_Description;
@@ -192,7 +189,7 @@ namespace SIREngine {
 			else if constexpr ( std::is_same<T, CString>() ) {
 				m_nType = CvarType_String;
 			}
-			else if constexpr ( std::is_same<T, FileSystem::CFilePath>() ) {
+			else if constexpr ( std::is_same<T, CFilePath>() ) {
 				m_nType = CvarType_FilePath;
 			}
 			else {
@@ -225,7 +222,7 @@ namespace SIREngine {
 			else if constexpr ( std::is_same<T, CString>() ) {
 				return m_Value;
 			}
-			else if constexpr ( std::is_same<T, FileSystem::CFilePath>() ) {
+			else if constexpr ( std::is_same<T, CFilePath>() ) {
 				return m_Value;
 			}
 			else {
@@ -234,7 +231,7 @@ namespace SIREngine {
 		}
 
 		inline void Register( void ) override
-		{ CConsoleManager::Get().RegisterCVarDefaultValue( this ); }
+		{ g_pConsoleManager->RegisterCVarDefaultValue( this ); }
 
 		inline T GetValue( void ) const
 		{ return m_Value; }
@@ -269,8 +266,8 @@ namespace SIREngine {
 				m_Value = value;
 			}
 		}
-		virtual void SetValue( const FileSystem::CFilePath& value ) override {
-			if constexpr ( std::is_same<T, FileSystem::CFilePath>() ) {
+		virtual void SetValue( const CFilePath& value ) override {
+			if constexpr ( std::is_same<T, CFilePath>() ) {
 				m_Value = value;
 			}
 		}
@@ -300,7 +297,7 @@ namespace SIREngine {
 			else if constexpr ( std::is_same<T, CString>() ) {
 				m_nType = CvarType_String;
 			}
-			else if constexpr ( std::is_same<T, FileSystem::CFilePath>() ) {
+			else if constexpr ( std::is_same<T, CFilePath>() ) {
 				m_nType = CvarType_FilePath;
 			}
 			else {
@@ -311,7 +308,7 @@ namespace SIREngine {
 		{ }
 
 		inline void Register( void ) override
-		{ CConsoleManager::Get().RegisterCVarDefaultValue( this ); }
+		{ g_pConsoleManager->RegisterCVarDefaultValue( this ); }
 
 		inline virtual const CString GetStringValue( void ) const override
 		{
@@ -330,7 +327,7 @@ namespace SIREngine {
 			else if constexpr ( std::is_same<T, CString>() ) {
 				return *m_pRefValue;
 			}
-			else if constexpr ( std::is_same<T, FileSystem::CFilePath>() ) {
+			else if constexpr ( std::is_same<T, CFilePath>() ) {
 				return *m_pRefValue;
 			}
 			else {
@@ -371,8 +368,8 @@ namespace SIREngine {
 				*m_pRefValue = value;
 			}
 		}
-		virtual void SetValue( const FileSystem::CFilePath& value ) override {
-			if constexpr ( std::is_same<T, FileSystem::CFilePath>() ) {
+		virtual void SetValue( const CFilePath& value ) override {
+			if constexpr ( std::is_same<T, CFilePath>() ) {
 				*m_pRefValue = value;
 			}
 		}
@@ -421,7 +418,7 @@ namespace SIREngine {
 	public:
 		CStaticConsoleCmd( const char *pName, cmdFunc_Static_t fn )
 			: IConsoleCmd( pName ), m_InternalFunction( fn )
-		{ CConsoleManager::Get().RegisterConsoleCommand( this ); }
+		{ g_pConsoleManager->RegisterConsoleCommand( this ); }
 		virtual ~CStaticConsoleCmd() override
 		{ }
 

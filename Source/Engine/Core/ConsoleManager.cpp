@@ -1,9 +1,11 @@
+#include "Util.h"
 #include "ConsoleManager.h"
+#include <Engine/Core/Serialization/Ini/IniSerializer.h>
 #include <locale.h>
 
-using namespace SIREngine;
+namespace SIREngine {
 
-CConsoleManager CConsoleManager::g_ConsoleManager;
+CConsoleManager *g_pConsoleManager;
 
 static const char *GetConfigSectionName( CvarGroup_t nGroup )
 {
@@ -410,13 +412,16 @@ void CConsoleManager::RegisterCVar( IConsoleVar *pCvar )
 }
 */
 
-void CConsoleManager::LoadConfig( const FileSystem::CFilePath& filePath )
+void CConsoleManager::LoadConfig( const CFilePath& filePath )
 {
     const char *pSectionName;
 
     SIRENGINE_LOG( "Loading Engine Configuration..." );
     
     m_pConfigLoader = new Serialization::CIniSerializer( filePath );
+	if ( !m_pConfigLoader ) {
+		return;
+	}
 
     for ( auto& it : m_ObjectList ) {
         if ( !it.second->AsVariable() ) {
@@ -444,7 +449,7 @@ void CConsoleManager::LoadConfig( const FileSystem::CFilePath& filePath )
             pCvar->SetValue( m_pConfigLoader->GetFloat( pSectionName, pCvar->GetName() ) );
             break;
         case CvarType_FilePath:
-            pCvar->SetValue( FileSystem::CFilePath( m_pConfigLoader->GetString( pSectionName, pCvar->GetName() ).c_str() ) );
+            pCvar->SetValue( CFilePath( m_pConfigLoader->GetString( pSectionName, pCvar->GetName() ).c_str() ) );
             break;
         case CvarType_String:
             pCvar->SetValue( m_pConfigLoader->GetString( pSectionName, pCvar->GetName() ) );
@@ -455,7 +460,7 @@ void CConsoleManager::LoadConfig( const FileSystem::CFilePath& filePath )
     SIRENGINE_LOG( "Done." );
 }
 
-void CConsoleManager::SaveConfig( const FileSystem::CFilePath& filePath ) const
+void CConsoleManager::SaveConfig( const CFilePath& filePath ) const
 {
     SIRENGINE_LOG( "Saving Engine Configuration..." );
     for ( const auto& var : m_ObjectList ) {
@@ -577,3 +582,5 @@ void CConsoleManager::ExecuteCommand( const char *pText )
         }
     }
 }
+
+};

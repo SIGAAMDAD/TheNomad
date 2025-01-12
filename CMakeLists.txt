@@ -37,6 +37,24 @@ set(SOURCE_FILES
 	Source/Engine/Core/Core.h
 	Source/Engine/Core/Util.h
 	Source/Engine/Core/Util.cpp
+	Source/Engine/Core/Serialization/Ini/ini.cpp
+	Source/Engine/Core/Serialization/Ini/ini.h
+	Source/Engine/Core/Serialization/Ini/IniReader.cpp
+	Source/Engine/Core/Serialization/Ini/IniWriter.cpp
+	Source/Engine/Core/Serialization/Ini/IniSerializer.h
+	Source/Engine/Core/Serialization/SerializerBase.h
+	Source/Engine/Core/FileSystem/CachedFile.h
+	Source/Engine/Core/FileSystem/CachedFile.cpp
+	Source/Engine/Core/FileSystem/FileWriter.h
+	Source/Engine/Core/FileSystem/FileWriter.cpp
+	Source/Engine/Core/FileSystem/FileReader.h
+	Source/Engine/Core/FileSystem/FileReader.cpp
+	Source/Engine/Core/FileSystem/FileSystem.h
+	Source/Engine/Core/FileSystem/FileSystem.cpp
+	Source/Engine/Core/FileSystem/FileList.h
+	Source/Engine/Core/FileSystem/FileList.cpp
+	Source/Engine/Core/ConsoleManager.h
+	Source/Engine/Core/ConsoleManager.cpp
 	Source/Engine/Core/ThreadSystem/Threads.h
 	Source/Engine/Core/ThreadSystem/Threads.cpp
 	Source/Engine/Core/Logging/Logger.h
@@ -62,6 +80,7 @@ target_link_libraries(TheNomad.x64
 	-lSDL2
 	-lboost_thread
 	-lboost_chrono
+	-lboost_filesystem
 )
 
 # Shader files

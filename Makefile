@@ -187,6 +187,150 @@ clean-all/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/clean-all.dir/build.make CMakeFiles/clean-all.dir/build
 .PHONY : clean-all/fast
 
+Source/Engine/Core/ConsoleManager.o: Source/Engine/Core/ConsoleManager.cpp.o
+.PHONY : Source/Engine/Core/ConsoleManager.o
+
+# target to build an object file
+Source/Engine/Core/ConsoleManager.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/Core/ConsoleManager.cpp.o
+.PHONY : Source/Engine/Core/ConsoleManager.cpp.o
+
+Source/Engine/Core/ConsoleManager.i: Source/Engine/Core/ConsoleManager.cpp.i
+.PHONY : Source/Engine/Core/ConsoleManager.i
+
+# target to preprocess a source file
+Source/Engine/Core/ConsoleManager.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/Core/ConsoleManager.cpp.i
+.PHONY : Source/Engine/Core/ConsoleManager.cpp.i
+
+Source/Engine/Core/ConsoleManager.s: Source/Engine/Core/ConsoleManager.cpp.s
+.PHONY : Source/Engine/Core/ConsoleManager.s
+
+# target to generate assembly for a file
+Source/Engine/Core/ConsoleManager.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/Core/ConsoleManager.cpp.s
+.PHONY : Source/Engine/Core/ConsoleManager.cpp.s
+
+Source/Engine/Core/FileSystem/CachedFile.o: Source/Engine/Core/FileSystem/CachedFile.cpp.o
+.PHONY : Source/Engine/Core/FileSystem/CachedFile.o
+
+# target to build an object file
+Source/Engine/Core/FileSystem/CachedFile.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/Core/FileSystem/CachedFile.cpp.o
+.PHONY : Source/Engine/Core/FileSystem/CachedFile.cpp.o
+
+Source/Engine/Core/FileSystem/CachedFile.i: Source/Engine/Core/FileSystem/CachedFile.cpp.i
+.PHONY : Source/Engine/Core/FileSystem/CachedFile.i
+
+# target to preprocess a source file
+Source/Engine/Core/FileSystem/CachedFile.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/Core/FileSystem/CachedFile.cpp.i
+.PHONY : Source/Engine/Core/FileSystem/CachedFile.cpp.i
+
+Source/Engine/Core/FileSystem/CachedFile.s: Source/Engine/Core/FileSystem/CachedFile.cpp.s
+.PHONY : Source/Engine/Core/FileSystem/CachedFile.s
+
+# target to generate assembly for a file
+Source/Engine/Core/FileSystem/CachedFile.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/Core/FileSystem/CachedFile.cpp.s
+.PHONY : Source/Engine/Core/FileSystem/CachedFile.cpp.s
+
+Source/Engine/Core/FileSystem/FileList.o: Source/Engine/Core/FileSystem/FileList.cpp.o
+.PHONY : Source/Engine/Core/FileSystem/FileList.o
+
+# target to build an object file
+Source/Engine/Core/FileSystem/FileList.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/Core/FileSystem/FileList.cpp.o
+.PHONY : Source/Engine/Core/FileSystem/FileList.cpp.o
+
+Source/Engine/Core/FileSystem/FileList.i: Source/Engine/Core/FileSystem/FileList.cpp.i
+.PHONY : Source/Engine/Core/FileSystem/FileList.i
+
+# target to preprocess a source file
+Source/Engine/Core/FileSystem/FileList.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/Core/FileSystem/FileList.cpp.i
+.PHONY : Source/Engine/Core/FileSystem/FileList.cpp.i
+
+Source/Engine/Core/FileSystem/FileList.s: Source/Engine/Core/FileSystem/FileList.cpp.s
+.PHONY : Source/Engine/Core/FileSystem/FileList.s
+
+# target to generate assembly for a file
+Source/Engine/Core/FileSystem/FileList.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/Core/FileSystem/FileList.cpp.s
+.PHONY : Source/Engine/Core/FileSystem/FileList.cpp.s
+
+Source/Engine/Core/FileSystem/FileReader.o: Source/Engine/Core/FileSystem/FileReader.cpp.o
+.PHONY : Source/Engine/Core/FileSystem/FileReader.o
+
+# target to build an object file
+Source/Engine/Core/FileSystem/FileReader.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/Core/FileSystem/FileReader.cpp.o
+.PHONY : Source/Engine/Core/FileSystem/FileReader.cpp.o
+
+Source/Engine/Core/FileSystem/FileReader.i: Source/Engine/Core/FileSystem/FileReader.cpp.i
+.PHONY : Source/Engine/Core/FileSystem/FileReader.i
+
+# target to preprocess a source file
+Source/Engine/Core/FileSystem/FileReader.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/Core/FileSystem/FileReader.cpp.i
+.PHONY : Source/Engine/Core/FileSystem/FileReader.cpp.i
+
+Source/Engine/Core/FileSystem/FileReader.s: Source/Engine/Core/FileSystem/FileReader.cpp.s
+.PHONY : Source/Engine/Core/FileSystem/FileReader.s
+
+# target to generate assembly for a file
+Source/Engine/Core/FileSystem/FileReader.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/Core/FileSystem/FileReader.cpp.s
+.PHONY : Source/Engine/Core/FileSystem/FileReader.cpp.s
+
+Source/Engine/Core/FileSystem/FileSystem.o: Source/Engine/Core/FileSystem/FileSystem.cpp.o
+.PHONY : Source/Engine/Core/FileSystem/FileSystem.o
+
+# target to build an object file
+Source/Engine/Core/FileSystem/FileSystem.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/Core/FileSystem/FileSystem.cpp.o
+.PHONY : Source/Engine/Core/FileSystem/FileSystem.cpp.o
+
+Source/Engine/Core/FileSystem/FileSystem.i: Source/Engine/Core/FileSystem/FileSystem.cpp.i
+.PHONY : Source/Engine/Core/FileSystem/FileSystem.i
+
+# target to preprocess a source file
+Source/Engine/Core/FileSystem/FileSystem.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/Core/FileSystem/FileSystem.cpp.i
+.PHONY : Source/Engine/Core/FileSystem/FileSystem.cpp.i
+
+Source/Engine/Core/FileSystem/FileSystem.s: Source/Engine/Core/FileSystem/FileSystem.cpp.s
+.PHONY : Source/Engine/Core/FileSystem/FileSystem.s
+
+# target to generate assembly for a file
+Source/Engine/Core/FileSystem/FileSystem.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/Core/FileSystem/FileSystem.cpp.s
+.PHONY : Source/Engine/Core/FileSystem/FileSystem.cpp.s
+
+Source/Engine/Core/FileSystem/FileWriter.o: Source/Engine/Core/FileSystem/FileWriter.cpp.o
+.PHONY : Source/Engine/Core/FileSystem/FileWriter.o
+
+# target to build an object file
+Source/Engine/Core/FileSystem/FileWriter.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/Core/FileSystem/FileWriter.cpp.o
+.PHONY : Source/Engine/Core/FileSystem/FileWriter.cpp.o
+
+Source/Engine/Core/FileSystem/FileWriter.i: Source/Engine/Core/FileSystem/FileWriter.cpp.i
+.PHONY : Source/Engine/Core/FileSystem/FileWriter.i
+
+# target to preprocess a source file
+Source/Engine/Core/FileSystem/FileWriter.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/Core/FileSystem/FileWriter.cpp.i
+.PHONY : Source/Engine/Core/FileSystem/FileWriter.cpp.i
+
+Source/Engine/Core/FileSystem/FileWriter.s: Source/Engine/Core/FileSystem/FileWriter.cpp.s
+.PHONY : Source/Engine/Core/FileSystem/FileWriter.s
+
+# target to generate assembly for a file
+Source/Engine/Core/FileSystem/FileWriter.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/Core/FileSystem/FileWriter.cpp.s
+.PHONY : Source/Engine/Core/FileSystem/FileWriter.cpp.s
+
 Source/Engine/Core/Logging/Logger.o: Source/Engine/Core/Logging/Logger.cpp.o
 .PHONY : Source/Engine/Core/Logging/Logger.o
 
@@ -210,6 +354,78 @@ Source/Engine/Core/Logging/Logger.s: Source/Engine/Core/Logging/Logger.cpp.s
 Source/Engine/Core/Logging/Logger.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/Core/Logging/Logger.cpp.s
 .PHONY : Source/Engine/Core/Logging/Logger.cpp.s
+
+Source/Engine/Core/Serialization/Ini/IniReader.o: Source/Engine/Core/Serialization/Ini/IniReader.cpp.o
+.PHONY : Source/Engine/Core/Serialization/Ini/IniReader.o
+
+# target to build an object file
+Source/Engine/Core/Serialization/Ini/IniReader.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/Core/Serialization/Ini/IniReader.cpp.o
+.PHONY : Source/Engine/Core/Serialization/Ini/IniReader.cpp.o
+
+Source/Engine/Core/Serialization/Ini/IniReader.i: Source/Engine/Core/Serialization/Ini/IniReader.cpp.i
+.PHONY : Source/Engine/Core/Serialization/Ini/IniReader.i
+
+# target to preprocess a source file
+Source/Engine/Core/Serialization/Ini/IniReader.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/Core/Serialization/Ini/IniReader.cpp.i
+.PHONY : Source/Engine/Core/Serialization/Ini/IniReader.cpp.i
+
+Source/Engine/Core/Serialization/Ini/IniReader.s: Source/Engine/Core/Serialization/Ini/IniReader.cpp.s
+.PHONY : Source/Engine/Core/Serialization/Ini/IniReader.s
+
+# target to generate assembly for a file
+Source/Engine/Core/Serialization/Ini/IniReader.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/Core/Serialization/Ini/IniReader.cpp.s
+.PHONY : Source/Engine/Core/Serialization/Ini/IniReader.cpp.s
+
+Source/Engine/Core/Serialization/Ini/IniWriter.o: Source/Engine/Core/Serialization/Ini/IniWriter.cpp.o
+.PHONY : Source/Engine/Core/Serialization/Ini/IniWriter.o
+
+# target to build an object file
+Source/Engine/Core/Serialization/Ini/IniWriter.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/Core/Serialization/Ini/IniWriter.cpp.o
+.PHONY : Source/Engine/Core/Serialization/Ini/IniWriter.cpp.o
+
+Source/Engine/Core/Serialization/Ini/IniWriter.i: Source/Engine/Core/Serialization/Ini/IniWriter.cpp.i
+.PHONY : Source/Engine/Core/Serialization/Ini/IniWriter.i
+
+# target to preprocess a source file
+Source/Engine/Core/Serialization/Ini/IniWriter.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/Core/Serialization/Ini/IniWriter.cpp.i
+.PHONY : Source/Engine/Core/Serialization/Ini/IniWriter.cpp.i
+
+Source/Engine/Core/Serialization/Ini/IniWriter.s: Source/Engine/Core/Serialization/Ini/IniWriter.cpp.s
+.PHONY : Source/Engine/Core/Serialization/Ini/IniWriter.s
+
+# target to generate assembly for a file
+Source/Engine/Core/Serialization/Ini/IniWriter.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/Core/Serialization/Ini/IniWriter.cpp.s
+.PHONY : Source/Engine/Core/Serialization/Ini/IniWriter.cpp.s
+
+Source/Engine/Core/Serialization/Ini/ini.o: Source/Engine/Core/Serialization/Ini/ini.cpp.o
+.PHONY : Source/Engine/Core/Serialization/Ini/ini.o
+
+# target to build an object file
+Source/Engine/Core/Serialization/Ini/ini.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/Core/Serialization/Ini/ini.cpp.o
+.PHONY : Source/Engine/Core/Serialization/Ini/ini.cpp.o
+
+Source/Engine/Core/Serialization/Ini/ini.i: Source/Engine/Core/Serialization/Ini/ini.cpp.i
+.PHONY : Source/Engine/Core/Serialization/Ini/ini.i
+
+# target to preprocess a source file
+Source/Engine/Core/Serialization/Ini/ini.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/Core/Serialization/Ini/ini.cpp.i
+.PHONY : Source/Engine/Core/Serialization/Ini/ini.cpp.i
+
+Source/Engine/Core/Serialization/Ini/ini.s: Source/Engine/Core/Serialization/Ini/ini.cpp.s
+.PHONY : Source/Engine/Core/Serialization/Ini/ini.s
+
+# target to generate assembly for a file
+Source/Engine/Core/Serialization/Ini/ini.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/Core/Serialization/Ini/ini.cpp.s
+.PHONY : Source/Engine/Core/Serialization/Ini/ini.cpp.s
 
 Source/Engine/Core/System/GenericApplication/GenericApplication.o: Source/Engine/Core/System/GenericApplication/GenericApplication.cpp.o
 .PHONY : Source/Engine/Core/System/GenericApplication/GenericApplication.o
@@ -321,9 +537,36 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... clean-all"
 	@echo "... TheNomad.x64"
+	@echo "... Source/Engine/Core/ConsoleManager.o"
+	@echo "... Source/Engine/Core/ConsoleManager.i"
+	@echo "... Source/Engine/Core/ConsoleManager.s"
+	@echo "... Source/Engine/Core/FileSystem/CachedFile.o"
+	@echo "... Source/Engine/Core/FileSystem/CachedFile.i"
+	@echo "... Source/Engine/Core/FileSystem/CachedFile.s"
+	@echo "... Source/Engine/Core/FileSystem/FileList.o"
+	@echo "... Source/Engine/Core/FileSystem/FileList.i"
+	@echo "... Source/Engine/Core/FileSystem/FileList.s"
+	@echo "... Source/Engine/Core/FileSystem/FileReader.o"
+	@echo "... Source/Engine/Core/FileSystem/FileReader.i"
+	@echo "... Source/Engine/Core/FileSystem/FileReader.s"
+	@echo "... Source/Engine/Core/FileSystem/FileSystem.o"
+	@echo "... Source/Engine/Core/FileSystem/FileSystem.i"
+	@echo "... Source/Engine/Core/FileSystem/FileSystem.s"
+	@echo "... Source/Engine/Core/FileSystem/FileWriter.o"
+	@echo "... Source/Engine/Core/FileSystem/FileWriter.i"
+	@echo "... Source/Engine/Core/FileSystem/FileWriter.s"
 	@echo "... Source/Engine/Core/Logging/Logger.o"
 	@echo "... Source/Engine/Core/Logging/Logger.i"
 	@echo "... Source/Engine/Core/Logging/Logger.s"
+	@echo "... Source/Engine/Core/Serialization/Ini/IniReader.o"
+	@echo "... Source/Engine/Core/Serialization/Ini/IniReader.i"
+	@echo "... Source/Engine/Core/Serialization/Ini/IniReader.s"
+	@echo "... Source/Engine/Core/Serialization/Ini/IniWriter.o"
+	@echo "... Source/Engine/Core/Serialization/Ini/IniWriter.i"
+	@echo "... Source/Engine/Core/Serialization/Ini/IniWriter.s"
+	@echo "... Source/Engine/Core/Serialization/Ini/ini.o"
+	@echo "... Source/Engine/Core/Serialization/Ini/ini.i"
+	@echo "... Source/Engine/Core/Serialization/Ini/ini.s"
 	@echo "... Source/Engine/Core/System/GenericApplication/GenericApplication.o"
 	@echo "... Source/Engine/Core/System/GenericApplication/GenericApplication.i"
 	@echo "... Source/Engine/Core/System/GenericApplication/GenericApplication.s"

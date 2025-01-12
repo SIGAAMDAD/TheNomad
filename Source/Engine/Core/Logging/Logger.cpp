@@ -4,6 +4,9 @@
 #include <EASTL/chrono.h>
 #include <boost/thread.hpp>
 #include <Engine/Core/ThreadSystem/Threads.h>
+#include <Engine/Core/System/GenericApplication/GenericApplication.h>
+#include <Engine/Core/FileSystem/FileWriter.h>
+#include <Engine/Core/ConsoleManager.h>
 
 #define TTY_COLOR_BLACK "30"
 #define TTY_COLOR_RED "31"
@@ -41,8 +44,8 @@ bool CLogManager::bLogIncludeFileInfo = false;
 
 // if true, each log will include the time
 bool CLogManager::bLogIncludeTimeInfo = true;
-/*
-static FileSystem::CFileWriter *s_pLogFile;
+
+static CFileWriter s_LogFile;
 
 static CVar<uint32_t> e_LogLevel(
 	"e.LogLevel",
@@ -52,7 +55,7 @@ static CVar<uint32_t> e_LogLevel(
 	CVG_SYSTEMINFO
 );
 
-static CVar<bool32> e_LogToFile(
+static CVar<bool> e_LogToFile(
 	"e.LogToFile",
 	true,
 	Cvar_Save,
@@ -60,7 +63,7 @@ static CVar<bool32> e_LogToFile(
 	CVG_SYSTEMINFO
 );
 
-static CVarRef<bool32> e_LogIncludeFileInfo(
+static CVarRef<bool> e_LogIncludeFileInfo(
 	"e.LogIncludeFileInfo",
 	CLogManager::bLogIncludeFileInfo,
 	Cvar_Default,
@@ -68,14 +71,13 @@ static CVarRef<bool32> e_LogIncludeFileInfo(
 	CVG_SYSTEMINFO
 );
 
-static CVarRef<bool32> e_LogIncludeTimeInfo(
+static CVarRef<bool> e_LogIncludeTimeInfo(
 	"e.LogIncludeTimeInfo",
 	CLogManager::bLogIncludeTimeInfo,
 	Cvar_Default,
 	"If true, each log will include the time",
 	CVG_SYSTEMINFO
 );
-*/
 
 CLogCategory::CLogCategory( const CString& categoryName, ELogLevel::Type nDefaultVerbosity )
 	: m_nVerbosityLevel( nDefaultVerbosity ),
@@ -101,29 +103,21 @@ CLogManager::~CLogManager()
 
 void CLogManager::LaunchLoggingThread( void )
 {
-	/*
 	e_LogLevel.Register();
 	e_LogToFile.Register();
 	e_LogIncludeFileInfo.Register();
 	e_LogIncludeTimeInfo.Register();
-	*/
 
 	s_LogThread.Run( CLogManager::LogThread, "LoggingThread" );
 
-/*
 	if ( e_LogToFile.GetValue() ) {
-		s_pLogFile = g_pFileSystem->OpenFileWriter( "Config/debug.log" );
+		s_LogFile.Open( "Config/debug.log" );
 	}
-*/
 }
 
 void CLogManager::ShutdownLogger( void )
 {
-	/*
-	if ( s_pLogFile ) {
-		delete s_pLogFile;
-	}
-	*/
+	s_LogFile.Close();
 	s_LogThread.Join();
 }
 
@@ -145,11 +139,9 @@ static const char *GetTime( void )
 void SIRENGINE_ATTRIBUTE(format(printf, 3, 4)) CLogManager::LogInfo( const LogData_t& data,
 	const char *fmt, ... )
 {
-	/*
 	if ( e_LogLevel.GetValue() < ELogLevel::Info ) {
 		return;
 	}
-	*/
 
 	va_list argptr;
 	char msg[8192];
@@ -169,11 +161,9 @@ void SIRENGINE_ATTRIBUTE(format(printf, 3, 4)) CLogManager::LogInfo( const LogDa
 void SIRENGINE_ATTRIBUTE(format(printf, 3, 4)) CLogManager::LogWarning( const LogData_t& data,
 	const char *fmt, ... )
 {
-	/*
 	if ( e_LogLevel.GetValue() < ELogLevel::Warning ) {
 		return;
 	}
-	*/
 
 	va_list argptr;
 	char msg[8192];
@@ -194,11 +184,9 @@ void SIRENGINE_ATTRIBUTE(format(printf, 3, 4)) CLogManager::LogWarning( const Lo
 void SIRENGINE_ATTRIBUTE(format(printf, 3, 4)) CLogManager::SendNotification( const LogData_t& data,
 	const char *fmt, ... )
 {
-	/*
 	if ( e_LogLevel.GetValue() < ELogLevel::Spam ) {
 		return;
 	}
-	*/
 
 	va_list argptr;
 	char msg[8192];
@@ -278,11 +266,9 @@ void SIRENGINE_ATTRIBUTE(format(printf, 3, 4)) CLogManager::LogCategory( const L
 
 void SIRENGINE_ATTRIBUTE(format(printf, 3, 4)) CLogManager::LogError( const LogData_t& data, const char *fmt, ... )
 {
-	/*
 	if ( e_LogLevel.GetValue() < ELogLevel::Error ) {
 		return;
 	}
-	*/
 
 	va_list argptr;
 	char msg[8192];
@@ -318,13 +304,10 @@ int CLogManager::LogThread( void *unused )
 
 	while ( 1 ) {
 		while ( LogMessageQueue.pop( queueMessage ) ) {
-			/*
-			g_pApplication->FileWrite( queueMessage.szMessage, queueMessage.nStringLength, SIRENGINE_STDOUT_HANDLE );
-			if ( s_pLogFile ) {
-				s_pLogFile->Write( queueMessage.szMessage, queueMessage.nStringLength );
+			System::FileWrite( queueMessage.szMessage, queueMessage.nStringLength, SIRENGINE_STDOUT_HANDLE );
+			if ( s_LogFile.IsOpen() ) {
+				s_LogFile.Write( queueMessage.szMessage, queueMessage.nStringLength );
 		    }
-			*/
-			fprintf( stdout, "%s", queueMessage.szMessage );
 		}
 		
 		if ( System::g_bExitApp.load() ) {
@@ -333,6 +316,7 @@ int CLogManager::LogThread( void *unused )
 			boost::this_thread::sleep_for( boost::chrono::milliseconds( 10 ) );
 		}
 	}
+	return 0;
 }
 
 };

@@ -20,6 +20,7 @@
 #include <EASTL/stack.h>
 #include <EASTL/allocator.h>
 #include <EASTL/algorithm.h>
+#include <EASTL/sort.h>
 #include <EASTL/unordered_map.h>
 #include <EASTL/array.h>
 #include <EASTL/vector_map.h>

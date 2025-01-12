@@ -2,6 +2,13 @@
 #define STB_SPRINTF_IMPLEMENTATION
 #include "stb_sprintf.h"
 
+namespace EA::StdC {
+	EASTL_EASTDC_API int Vsnprintf( char*  EA_RESTRICT pDestination, size_t n, const char*  EA_RESTRICT pFormat, va_list arguments )
+	{
+		return SIREngine_Vsnprintf( pDestination, n, pFormat, arguments );
+	}
+};
+
 const char *SIRENGINE_ATTRIBUTE(format(printf, 1, 2)) SIRENGINE_TEMP_VSTRING( const char *fmt, ... )
 {
     va_list argptr;

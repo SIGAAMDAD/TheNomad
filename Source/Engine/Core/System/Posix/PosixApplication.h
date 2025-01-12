@@ -13,7 +13,7 @@ class PosixApplication : public IGenericApplication
 {
 public:
 	PosixApplication( void );
-	virtual ~PosixApplication();
+	virtual ~PosixApplication() override;
 
 	virtual void Init( void ) override;
 	virtual void Run( void ) override;
