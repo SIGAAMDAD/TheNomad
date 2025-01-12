@@ -10,7 +10,7 @@
 typedef uint32_t bool32;
 typedef uint8_t byte;
 
-// cacheline aligned string
+// cacheline aligned string (24)
 typedef eastl::fixed_string<char, 24, true> CString;
 
 #endif

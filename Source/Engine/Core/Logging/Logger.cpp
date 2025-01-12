@@ -257,7 +257,7 @@ void SIRENGINE_ATTRIBUTE(format(printf, 3, 4)) CLogManager::LogCategory( const L
 			" %s%s: %s \x1B[0m\n"
 			, GetExtraString( data.pFileName, data.pFunction, data.nLineNumber ), data.pCategory->GetCategoryName().c_str(), msg
 		);
-//		Application::Get()->Shutdown();
+		System::Error( buf );
 		break;
 	};
 	
@@ -278,9 +278,7 @@ void SIRENGINE_ATTRIBUTE(format(printf, 3, 4)) CLogManager::LogError( const LogD
 	SIREngine_Vsnprintf( msg, sizeof( msg ) - 1, fmt, argptr );
 	va_end( argptr );
 
-//	Application::g_bExitApp.store( true );
-
-//	g_pApplication->Error( msg );
+	LogMessageQueue.push( CMessage( msg ) );
 }
 
 const char *CLogManager::GetExtraString( const char *pFileName, const char *pFunction, uint64_t nLineNumber )

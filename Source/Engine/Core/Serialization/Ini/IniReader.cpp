@@ -6,6 +6,8 @@
 
 namespace SIREngine::Serialization {
 
+static const CString emptyValue = "";
+
 bool CIniSerializer::Load( const CFilePath& filePath )
 {
 	m_FilePath = filePath;
@@ -31,23 +33,23 @@ int CIniSerializer::ParseError( void ) const
 	return m_nError;
 }
 
-CString CIniSerializer::Get( const CString& section, const CString& name ) const
+const CString& CIniSerializer::Get( const CString& section, const CString& name ) const
 {
 	if ( m_Values.find( section ) != m_Values.end() ) {
 		return m_Values.at( section ).at( name );
 	}
-	return "";
+	return emptyValue;
 }
 
 CString CIniSerializer::GetString( const CString& section, const CString& name ) const
 {
-	const CString str = Get( section, name );
+	const CString& str = Get( section, name );
 	return str.empty() ? "" : str;
 }
 
 int CIniSerializer::GetInt( const CString& section, const CString& name ) const
 {
-	CString valstr = Get( section, name );
+	const CString& valstr = Get( section, name );
 	if ( !valstr.size() ) {
 		return 0;
 	}
@@ -56,7 +58,7 @@ int CIniSerializer::GetInt( const CString& section, const CString& name ) const
 
 int64_t CIniSerializer::GetInt64( const CString& section, const CString& name ) const
 {
-	CString valstr = Get( section, name );
+	const CString& valstr = Get( section, name );
 	if ( !valstr.size() ) {
 		return 0;
 	}
@@ -65,7 +67,7 @@ int64_t CIniSerializer::GetInt64( const CString& section, const CString& name ) 
 
 unsigned CIniSerializer::GetUInt( const CString& section, const CString& name ) const
 {
-	CString valstr = Get( section, name );
+	const CString& valstr = Get( section, name );
 	if ( !valstr.size() ) {
 		return 0;
 	}
@@ -74,7 +76,7 @@ unsigned CIniSerializer::GetUInt( const CString& section, const CString& name ) 
 
 uint64_t CIniSerializer::GetUInt64( const CString& section, const CString& name ) const
 {
-	CString valstr = Get( section, name );
+	const CString& valstr = Get( section, name );
 	if ( !valstr.size() ) {
 		return 0;
 	}
@@ -83,7 +85,7 @@ uint64_t CIniSerializer::GetUInt64( const CString& section, const CString& name 
 
 float CIniSerializer::GetFloat( const CString& section, const CString& name ) const
 {
-	CString valstr = Get( section, name );
+	const CString& valstr = Get( section, name );
 	if ( !valstr.size() ) {
 		return 0.0f;
 	}
@@ -92,7 +94,7 @@ float CIniSerializer::GetFloat( const CString& section, const CString& name ) co
 
 bool CIniSerializer::GetBool( const CString& section, const CString& name ) const
 {
-	CString valstr = Get( section, name );
+	const CString& valstr = Get( section, name );
 
 	if ( valstr == "true" || valstr == "yes" || valstr == "1" || valstr == "on" ) {
 		return true;
@@ -135,7 +137,9 @@ int CIniSerializer::ValueHandler( void *user, const char *section, const char *n
 		reader->m_Values.try_emplace( section );
 	}
 	if ( name && value ) {
-		reader->m_Values.at( section ).try_emplace( name, value );
+		const CString nameString = name;
+		const CString valueString = value;
+		reader->m_Values.at( section ).try_emplace( nameString, valueString );
 	}
 	return 1;
 }

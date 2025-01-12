@@ -15,6 +15,9 @@ class VKContext : public IRenderContext
 public:
 	VKContext( const ContextInfo_t& contextInfo );
 
+	virtual void BeginFrame( void ) override;
+	virtual void EndFrame( void ) override;
+
 	VkDevice GetDevice( void );
 	VkPhysicalDevice GetPhysicalDevice( void );
 	VkSurfaceKHR GetSurface( void );
@@ -23,12 +26,14 @@ public:
 private:
 	virtual bool CreateWindow( void ) override;
 	virtual void ShutdownBackend( void ) override;
+	virtual void RegisterBackendCvars( void ) override;
 	
 	void InitSwapChain( void );
 	void InitPhysicalDevice( void );
 	void InitLogicalDevice( void );
 	void InitRenderPass( void );
 	void InitCommandBuffer( void );
+	void InitSyncObjects( void );
 	void CreateFixedFunctionPipeline( void );
 
 	void RecordCommandBuffer( VkCommandBuffer hCommandBuffer, uint32_t nImageIndex );
@@ -45,6 +50,8 @@ private:
 	VkPipelineLayout m_hPipelineLayout;
 	VkRenderPass m_hRenderPass;
 	VkCommandPool m_hCommandPool;
+	VkSemaphore m_hImageAvailableSemaphore[ VK_MAX_FRAMES_IN_FLIGHT ];
+	VkSemaphore m_hRenderFinishedSemaphore[ VK_MAX_FRAMES_IN_FLIGHT ];
 	VkCommandBuffer m_hCommandBuffers[ VK_MAX_FRAMES_IN_FLIGHT ];
 	VkFence m_hInFlightFences[ VK_MAX_FRAMES_IN_FLIGHT ];
 

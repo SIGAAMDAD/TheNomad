@@ -93,7 +93,7 @@ FILE *CFileSystem::OpenFile( const CFilePath& filePath, EFileMode nMode )
 
 			pStream = fopen( searchPath.c_str(), "rb" );
 			if ( pStream ) {
-				SIRENGINE_LOG_LEVEL( FileSystem, ELogLevel::Info, "Opened file \"%s\"\n", searchPath.c_str() );
+				SIRENGINE_LOG_LEVEL( FileSystem, ELogLevel::Info, "Opened file \"%s\"", searchPath.c_str() );
 				return pStream;
 			}
 		}

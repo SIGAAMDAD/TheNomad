@@ -7,9 +7,11 @@
 
 #include <Engine/Core/Pch.h>
 #include <Engine/Core/Types.h>
+#include <Engine/Core/Compiler.h>
 #include <Engine/Core/ThreadSystem/Threads.h>
 #include <Engine/Core/FileSystem/FileSystem.h>
 #include <Engine/Core/EngineInterface.h>
+#include <Engine/Core/Events/EventBase.h>
 
 namespace SIREngine::System {
 
@@ -23,8 +25,11 @@ public:
 
 	virtual void Init( void ) = 0;
 	virtual void Run( void ) = 0;
+
+	static void QuitGame( const Events::IEventBase *pEventData );
 };
 
+void Error( const char *pError );
 bool CreateDirectory( const char *pDirectory );
 size_t FileWrite( const void *pBuffer, size_t nBytes, FileHandle_t hFile );
 size_t FileRead( void *pBuffer, size_t nBytes, FileHandle_t hFile );
@@ -35,6 +40,8 @@ eastl::vector<CFilePath> ListFiles( const CFilePath& directory, bool bDirectoryO
 
 extern IGenericApplication *g_pApplication;
 extern CThreadAtomic<bool> g_bExitApp;
+
+SIRENGINE_DECLARE_LOG_CATEGORY( System, ELogLevel::Info );
 
 };
 

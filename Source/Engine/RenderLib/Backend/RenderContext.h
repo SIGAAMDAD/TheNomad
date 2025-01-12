@@ -56,20 +56,25 @@ public:
 	virtual void Shutdown( void ) override;
 	virtual void Frame( uint32_t nFrameTic ) override;
 	virtual void Restart( void ) override;
+	virtual void RegisterCvars( void ) override;
+
+	virtual void BeginFrame( void ) = 0;
+	virtual void EndFrame( void ) = 0;
 
 	static IRenderContext *CreateContext( const ContextInfo_t& contextInfo );
 protected:
 	virtual bool CreateWindow( void ) = 0;
 	virtual void ShutdownBackend( void ) = 0;
+	virtual void RegisterBackendCvars( void ) = 0;
 
 	SDL_Window *m_pWindow;
 	ContextInfo_t m_ContextData;
 };
 
 extern IRenderContext *g_pContext;
-extern CVar<int32_t> r_VSync;
-extern CVar<uint32_t> r_RenderAPI;
-extern CVar<uint32_t> r_WindowMode;
+extern CVar<int32_t> vid_VSync;
+extern CVar<uint32_t> vid_RenderAPI;
+extern CVar<uint32_t> vid_WindowMode;
 
 SIRENGINE_DECLARE_LOG_CATEGORY( RenderBackend, ELogLevel::Info );
 

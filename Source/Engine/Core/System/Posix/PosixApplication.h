@@ -20,6 +20,21 @@ public:
 private:
 };
 
+typedef enum {
+	DR_YES = 0,
+	DR_NO = 1,
+	DR_OK = 0,
+	DR_CANCEL = 1
+} dialogResult_t;
+
+typedef enum {
+	DT_INFO,
+	DT_WARNING,
+	DT_ERROR,
+	DT_YES_NO,
+	DT_OK_CANCEL
+} dialogType_t;
+
 };
 
 #endif

@@ -6,6 +6,7 @@
 #include <Engine/Core/FileSystem/FileSystem.h>
 #include <Engine/Core/ConsoleManager.h>
 #include <Engine/RenderLib/Backend/RenderContext.h>
+#include <Engine/Core/Events/EventManager.h>
 #include <sys/stat.h>
 #include <errno.h>
 #include <libgen.h>
@@ -15,8 +16,14 @@ namespace SIREngine::System {
 
 static CFilePath CurrentPath;
 static eastl::vector<CString> CommandLine;
+int myargc;
+char **myargv;
 
 SIRENGINE_DEFINE_LOG_CATEGORY( System, ELogLevel::Info );
+
+extern "C" void InitCrashHandler( void );
+extern "C" void DumpStacktrace( void );
+dialogResult_t Sys_Dialog( dialogType_t type, const char *message, const char *title );
 
 PosixApplication::PosixApplication( void )
 {
@@ -25,14 +32,33 @@ PosixApplication::PosixApplication( void )
 PosixApplication::~PosixApplication()
 {
 	g_bExitApp.store( true );
+	g_pConsoleManager->SaveConfig( "config.ini" );
+	Events::g_pEventManager->Shutdown();
 	RenderLib::g_pContext->Shutdown();
 	delete RenderLib::g_pContext;
-	g_pConsoleManager->SaveConfig( "config.ini" );
 	CLogManager::ShutdownLogger();
+	g_pFileSystem->Shutdown();
 }
 
 void PosixApplication::Run( void )
 {
+	while ( 1 ) {
+		Events::g_pEventManager->Frame( 0 );
+		RenderLib::g_pContext->BeginFrame();
+
+		RenderLib::g_pContext->EndFrame();
+	}
+}
+
+void Error( const char *pError )
+{
+	FileWrite( pError, strlen( pError ), SIRENGINE_STDERR_HANDLE );
+
+	DumpStacktrace();
+	Sys_Dialog( DT_ERROR, "Engine Error", pError );
+	delete g_pApplication;
+
+	_Exit( EXIT_FAILURE );
 }
 
 size_t FileWrite( const void *pBuffer, size_t nBytes, FileHandle_t hFile )
@@ -72,11 +98,16 @@ void PosixApplication::Init( void )
 {
 	g_bExitApp.store( false );
 
+	InitCrashHandler();
+
 	static CFileSystem fileSystem;
 	g_pFileSystem = &fileSystem;
 
 	static CConsoleManager consoleManager;
 	g_pConsoleManager = &consoleManager;
+
+	static Events::CEventManager eventManager;
+	Events::g_pEventManager = &eventManager;
 
 	RenderLib::ContextInfo_t contextInfo;
 	contextInfo.pszWindowName = "TheNomad v1.2.0";
@@ -89,12 +120,26 @@ void PosixApplication::Init( void )
 
 	GetCurrentPath();
 
+	// initialize the filesystem first so that we can open a logfile
 	g_pFileSystem->Init();
-
-	RenderLib::g_pContext->Init();
-
 	CLogManager::LaunchLoggingThread();
-	g_pConsoleManager->LoadConfig( "config.ini" );
+
+	RenderLib::g_pContext->RegisterCvars();
+	Events::g_pEventManager->RegisterCvars();
+
+	// now load the configuration to overwrite any cvars
+	g_pConsoleManager->LoadConfig( "config.json" );
+
+	// initialize the rest of the engine
+	RenderLib::g_pContext->Init();
+	Events::g_pEventManager->Init();
+
+	Events::g_pEventManager->AddEventListener( eastl::make_shared<Events::CEventListener>(
+		"ApplicationListener", Events::EventType_Quit, IGenericApplication::QuitGame
+	) );
+
+	SIRENGINE_LOG( "SIREngine MetaData:" );
+	SIRENGINE_LOG( "  Engine Version: " SIRENGINE_VERSION_STRING );
 }
 
 bool CreateDirectory( const char *pDirectory )
@@ -167,6 +212,9 @@ bool CheckCommandParm( const CString& name )
 int main( int argc, char **argv )
 {
 	using namespace SIREngine::System;
+
+	myargc = argc;
+	myargv = argv;
 
 	CommandLine.reserve( argc );
 	for ( int i = 0; i < argc; i++ ) {

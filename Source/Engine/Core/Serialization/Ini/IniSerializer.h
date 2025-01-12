@@ -8,6 +8,7 @@
 #include <Engine/Core/FileSystem/FilePath.h>
 #include <Engine/Core/Types.h>
 #include "../SerializerBase.h"
+#include <EASTL/map.h>
 
 namespace SIREngine::Serialization {
 	class CIniSerializer : public ISerializerBase
@@ -22,7 +23,7 @@ namespace SIREngine::Serialization {
 
 		int ParseError( void ) const;
 
-		CString Get( const CString& section, const CString& name ) const;
+		const CString& Get( const CString& section, const CString& name ) const;
 		CString GetString( const CString& section, const CString& name ) const;
 
 		int GetInt( const CString& section, const CString& name ) const;

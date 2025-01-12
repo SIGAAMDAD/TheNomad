@@ -4,15 +4,15 @@
 
 namespace SIREngine::RenderLib {
 
-CVar<uint32_t> r_WindowMode(
+CVar<uint32_t> vid_WindowMode(
 	"vid.WindowMode",
-	(uint32_t)EWindowMode::BorderlessFullscreen,
+	(uint32_t)EWindowMode::Windowed,
 	Cvar_Save,
 	"Sets the engine's window mode",
 	CVG_RENDERER
 );
 
-CVar<uint32_t> r_RenderAPI(
+CVar<uint32_t> vid_RenderAPI(
 	"vid.RenderAPI",
 	(uint32_t)ERenderAPI::Vulkan,
 	Cvar_Save,
@@ -20,7 +20,7 @@ CVar<uint32_t> r_RenderAPI(
 	CVG_RENDERER
 );
 
-CVar<int32_t> r_VSync(
+CVar<int32_t> vid_VSync(
 	"vid.VSync",
 	(int32_t)EVSyncMode::Disabled,
 	Cvar_Save,
@@ -34,17 +34,26 @@ SIRENGINE_DEFINE_LOG_CATEGORY( RenderBackend, ELogLevel::Info );
 
 IRenderContext::IRenderContext( void )
 {
-	r_WindowMode.Register();
-	r_RenderAPI.Register();
-	r_VSync.Register();
 }
 
 IRenderContext::~IRenderContext()
 {
 }
 
+void IRenderContext::RegisterCvars( void )
+{
+	vid_WindowMode.Register();
+	vid_RenderAPI.Register();
+	vid_VSync.Register();
+
+	RegisterBackendCvars();
+}
+
 void IRenderContext::Init( void )
 {
+	if ( SDL_Init( SDL_INIT_VIDEO ) < 0 ) {
+		SIRENGINE_LOG_LEVEL( RenderBackend, ELogLevel::Fatal, "Error initialization SDL2 Video SubSystem: %s", SDL_GetError() );
+	}
 	SIRENGINE_LOG_LEVEL( RenderBackend, ELogLevel::Info, "Initializing RenderBackend..." );
 	if ( !CreateWindow() ) {
 		SIRENGINE_LOG_LEVEL( RenderBackend, ELogLevel::Fatal, "Error creating SDL2 window: %s", SDL_GetError() );
@@ -58,6 +67,7 @@ void IRenderContext::Shutdown( void )
 		SDL_DestroyWindow( m_pWindow );
 	}
 	m_pWindow = NULL;
+	SDL_QuitSubSystem( SDL_INIT_VIDEO );
 }
 
 void IRenderContext::Frame( uint32_t nFrameTic )
@@ -70,7 +80,7 @@ void IRenderContext::Restart( void )
 
 IRenderContext *IRenderContext::CreateContext( const ContextInfo_t& contextInfo )
 {
-	switch ( ERenderAPI( r_RenderAPI.GetValue() ) ) {
+	switch ( ERenderAPI( vid_RenderAPI.GetValue() ) ) {
 	case ERenderAPI::OpenGL:
 		SIRENGINE_LOG_LEVEL( RenderBackend, ELogLevel::Fatal, "OpenGL API not supported yet!" );
 	case ERenderAPI::Vulkan:

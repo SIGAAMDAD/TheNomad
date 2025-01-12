@@ -22,6 +22,7 @@ public:
 	virtual void Shutdown( void ) = 0;
 	virtual void Restart( void ) = 0;
 	virtual void Frame( uint32_t nFrameTic ) = 0;
+	virtual void RegisterCvars( void ) = 0;
 };
 
 };

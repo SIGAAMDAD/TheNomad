@@ -224,6 +224,78 @@ Source/Engine/Core/ConsoleManager.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/Core/ConsoleManager.cpp.s
 .PHONY : Source/Engine/Core/ConsoleManager.cpp.s
 
+Source/Engine/Core/Events/EventManager.o: Source/Engine/Core/Events/EventManager.cpp.o
+.PHONY : Source/Engine/Core/Events/EventManager.o
+
+# target to build an object file
+Source/Engine/Core/Events/EventManager.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/Core/Events/EventManager.cpp.o
+.PHONY : Source/Engine/Core/Events/EventManager.cpp.o
+
+Source/Engine/Core/Events/EventManager.i: Source/Engine/Core/Events/EventManager.cpp.i
+.PHONY : Source/Engine/Core/Events/EventManager.i
+
+# target to preprocess a source file
+Source/Engine/Core/Events/EventManager.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/Core/Events/EventManager.cpp.i
+.PHONY : Source/Engine/Core/Events/EventManager.cpp.i
+
+Source/Engine/Core/Events/EventManager.s: Source/Engine/Core/Events/EventManager.cpp.s
+.PHONY : Source/Engine/Core/Events/EventManager.s
+
+# target to generate assembly for a file
+Source/Engine/Core/Events/EventManager.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/Core/Events/EventManager.cpp.s
+.PHONY : Source/Engine/Core/Events/EventManager.cpp.s
+
+Source/Engine/Core/Events/GamepadEvent.o: Source/Engine/Core/Events/GamepadEvent.cpp.o
+.PHONY : Source/Engine/Core/Events/GamepadEvent.o
+
+# target to build an object file
+Source/Engine/Core/Events/GamepadEvent.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/Core/Events/GamepadEvent.cpp.o
+.PHONY : Source/Engine/Core/Events/GamepadEvent.cpp.o
+
+Source/Engine/Core/Events/GamepadEvent.i: Source/Engine/Core/Events/GamepadEvent.cpp.i
+.PHONY : Source/Engine/Core/Events/GamepadEvent.i
+
+# target to preprocess a source file
+Source/Engine/Core/Events/GamepadEvent.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/Core/Events/GamepadEvent.cpp.i
+.PHONY : Source/Engine/Core/Events/GamepadEvent.cpp.i
+
+Source/Engine/Core/Events/GamepadEvent.s: Source/Engine/Core/Events/GamepadEvent.cpp.s
+.PHONY : Source/Engine/Core/Events/GamepadEvent.s
+
+# target to generate assembly for a file
+Source/Engine/Core/Events/GamepadEvent.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/Core/Events/GamepadEvent.cpp.s
+.PHONY : Source/Engine/Core/Events/GamepadEvent.cpp.s
+
+Source/Engine/Core/Events/KeyEvent.o: Source/Engine/Core/Events/KeyEvent.cpp.o
+.PHONY : Source/Engine/Core/Events/KeyEvent.o
+
+# target to build an object file
+Source/Engine/Core/Events/KeyEvent.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/Core/Events/KeyEvent.cpp.o
+.PHONY : Source/Engine/Core/Events/KeyEvent.cpp.o
+
+Source/Engine/Core/Events/KeyEvent.i: Source/Engine/Core/Events/KeyEvent.cpp.i
+.PHONY : Source/Engine/Core/Events/KeyEvent.i
+
+# target to preprocess a source file
+Source/Engine/Core/Events/KeyEvent.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/Core/Events/KeyEvent.cpp.i
+.PHONY : Source/Engine/Core/Events/KeyEvent.cpp.i
+
+Source/Engine/Core/Events/KeyEvent.s: Source/Engine/Core/Events/KeyEvent.cpp.s
+.PHONY : Source/Engine/Core/Events/KeyEvent.s
+
+# target to generate assembly for a file
+Source/Engine/Core/Events/KeyEvent.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/Core/Events/KeyEvent.cpp.s
+.PHONY : Source/Engine/Core/Events/KeyEvent.cpp.s
+
 Source/Engine/Core/FileSystem/CachedFile.o: Source/Engine/Core/FileSystem/CachedFile.cpp.o
 .PHONY : Source/Engine/Core/FileSystem/CachedFile.o
 
@@ -488,6 +560,30 @@ Source/Engine/Core/System/Posix/PosixApplication.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/Core/System/Posix/PosixApplication.cpp.s
 .PHONY : Source/Engine/Core/System/Posix/PosixApplication.cpp.s
 
+Source/Engine/Core/System/Posix/PosixCrashHandler.o: Source/Engine/Core/System/Posix/PosixCrashHandler.cpp.o
+.PHONY : Source/Engine/Core/System/Posix/PosixCrashHandler.o
+
+# target to build an object file
+Source/Engine/Core/System/Posix/PosixCrashHandler.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/Core/System/Posix/PosixCrashHandler.cpp.o
+.PHONY : Source/Engine/Core/System/Posix/PosixCrashHandler.cpp.o
+
+Source/Engine/Core/System/Posix/PosixCrashHandler.i: Source/Engine/Core/System/Posix/PosixCrashHandler.cpp.i
+.PHONY : Source/Engine/Core/System/Posix/PosixCrashHandler.i
+
+# target to preprocess a source file
+Source/Engine/Core/System/Posix/PosixCrashHandler.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/Core/System/Posix/PosixCrashHandler.cpp.i
+.PHONY : Source/Engine/Core/System/Posix/PosixCrashHandler.cpp.i
+
+Source/Engine/Core/System/Posix/PosixCrashHandler.s: Source/Engine/Core/System/Posix/PosixCrashHandler.cpp.s
+.PHONY : Source/Engine/Core/System/Posix/PosixCrashHandler.s
+
+# target to generate assembly for a file
+Source/Engine/Core/System/Posix/PosixCrashHandler.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/Core/System/Posix/PosixCrashHandler.cpp.s
+.PHONY : Source/Engine/Core/System/Posix/PosixCrashHandler.cpp.s
+
 Source/Engine/Core/ThreadSystem/Threads.o: Source/Engine/Core/ThreadSystem/Threads.cpp.o
 .PHONY : Source/Engine/Core/ThreadSystem/Threads.o
 
@@ -608,6 +704,21 @@ Source/Engine/RenderLib/Backend/Vulkan/VulkanShader.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/RenderLib/Backend/Vulkan/VulkanShader.cpp.s
 .PHONY : Source/Engine/RenderLib/Backend/Vulkan/VulkanShader.cpp.s
 
+# target to build an object file
+cmake_pch.hxx.gch:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/cmake_pch.hxx.gch
+.PHONY : cmake_pch.hxx.gch
+
+# target to preprocess a source file
+cmake_pch.hxx.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/cmake_pch.hxx.i
+.PHONY : cmake_pch.hxx.i
+
+# target to generate assembly for a file
+cmake_pch.hxx.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/cmake_pch.hxx.s
+.PHONY : cmake_pch.hxx.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -626,6 +737,15 @@ help:
 	@echo "... Source/Engine/Core/ConsoleManager.o"
 	@echo "... Source/Engine/Core/ConsoleManager.i"
 	@echo "... Source/Engine/Core/ConsoleManager.s"
+	@echo "... Source/Engine/Core/Events/EventManager.o"
+	@echo "... Source/Engine/Core/Events/EventManager.i"
+	@echo "... Source/Engine/Core/Events/EventManager.s"
+	@echo "... Source/Engine/Core/Events/GamepadEvent.o"
+	@echo "... Source/Engine/Core/Events/GamepadEvent.i"
+	@echo "... Source/Engine/Core/Events/GamepadEvent.s"
+	@echo "... Source/Engine/Core/Events/KeyEvent.o"
+	@echo "... Source/Engine/Core/Events/KeyEvent.i"
+	@echo "... Source/Engine/Core/Events/KeyEvent.s"
 	@echo "... Source/Engine/Core/FileSystem/CachedFile.o"
 	@echo "... Source/Engine/Core/FileSystem/CachedFile.i"
 	@echo "... Source/Engine/Core/FileSystem/CachedFile.s"
@@ -659,6 +779,9 @@ help:
 	@echo "... Source/Engine/Core/System/Posix/PosixApplication.o"
 	@echo "... Source/Engine/Core/System/Posix/PosixApplication.i"
 	@echo "... Source/Engine/Core/System/Posix/PosixApplication.s"
+	@echo "... Source/Engine/Core/System/Posix/PosixCrashHandler.o"
+	@echo "... Source/Engine/Core/System/Posix/PosixCrashHandler.i"
+	@echo "... Source/Engine/Core/System/Posix/PosixCrashHandler.s"
 	@echo "... Source/Engine/Core/ThreadSystem/Threads.o"
 	@echo "... Source/Engine/Core/ThreadSystem/Threads.i"
 	@echo "... Source/Engine/Core/ThreadSystem/Threads.s"
@@ -674,6 +797,9 @@ help:
 	@echo "... Source/Engine/RenderLib/Backend/Vulkan/VulkanShader.o"
 	@echo "... Source/Engine/RenderLib/Backend/Vulkan/VulkanShader.i"
 	@echo "... Source/Engine/RenderLib/Backend/Vulkan/VulkanShader.s"
+	@echo "... cmake_pch.hxx.gch"
+	@echo "... cmake_pch.hxx.i"
+	@echo "... cmake_pch.hxx.s"
 .PHONY : help
 
 

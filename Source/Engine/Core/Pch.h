@@ -6,10 +6,12 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 
 #include <SDL2/SDL_thread.h>
 #include <SDL2/SDL_atomic.h>
 #include <SDL2/SDL_mutex.h>
+#include <SDL2/SDL.h>
 
 #include <EASTL/vector.h>
 #include <EASTL/fixed_vector.h>

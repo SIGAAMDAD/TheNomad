@@ -22,7 +22,8 @@ pkg_check_modules(SDL2 REQUIRED sdl2)
 
 # Include directories
 include_directories(${GTK3_INCLUDE_DIRS} ${PANGO_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS} ${FREETYPE2_INCLUDE_DIRS}
-	Source/ ThirdParty/EASTL/include/ ThirdParty/EABase/include/Common/ ThirdParty/VulkanMemoryAllocator/)
+	Source/ ThirdParty/EASTL/include/ ThirdParty/EABase/include/Common/ ThirdParty/VulkanMemoryAllocator/ ThirdParty/glm/
+	ThirdParty/json/single_include/)
 
 # Link directories
 link_directories(${GTK3_LIBRARY_DIRS} ${PANGO_LIBRARY_DIRS} ${SDL2_LIBRARY_DIRS} ${FREETYPE2_LIBRARY_DIRS})
@@ -38,6 +39,19 @@ set(SOURCE_FILES
 	Source/Engine/RenderLib/Backend/Vulkan/VulkanShader.cpp
 	Source/Engine/RenderLib/Backend/Vulkan/VulkanContext.h
 	Source/Engine/RenderLib/Backend/Vulkan/VulkanContext.cpp
+	Source/Engine/Core/Events/ControllerStatusEvent.h
+	Source/Engine/Core/Events/EventBase.h
+	Source/Engine/Core/Events/EventData.h
+	Source/Engine/Core/Events/EventManager.cpp
+	Source/Engine/Core/Events/EventManager.h
+	Source/Engine/Core/Events/GamepadEvent.cpp
+	Source/Engine/Core/Events/GamepadEvent.h
+	Source/Engine/Core/Events/KeyCodes.h
+	Source/Engine/Core/Events/KeyEvent.cpp
+	Source/Engine/Core/Events/KeyEvent.h
+	Source/Engine/Core/Events/MouseEvent.h
+	Source/Engine/Core/Events/TouchEvent.h
+	Source/Engine/Core/Events/WindowEvent.h
 	Source/Engine/Core/Pch.h
 	Source/Engine/Core/Platform.h
 	Source/Engine/Core/Types.h
@@ -68,11 +82,14 @@ set(SOURCE_FILES
 	Source/Engine/Core/Logging/Logger.cpp
 	Source/Engine/Core/System/GenericApplication/GenericApplication.h
 	Source/Engine/Core/System/GenericApplication/GenericApplication.cpp
+	Source/Engine/Core/System/Posix/PosixCrashHandler.cpp
 	Source/Engine/Core/System/Posix/PosixApplication.cpp
 )
 
 # Add executable
 add_executable(TheNomad.x64 ${SOURCE_FILES})
+
+target_precompile_headers(TheNomad.x64 PUBLIC Source/Engine/Core/Pch.h)
 
 # Link libraries
 target_link_libraries(TheNomad.x64

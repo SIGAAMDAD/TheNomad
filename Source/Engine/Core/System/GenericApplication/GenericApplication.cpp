@@ -25,4 +25,10 @@ IGenericApplication::~IGenericApplication()
 	g_bExitApp.store( true );
 }
 
+void IGenericApplication::QuitGame( const Events::IEventBase *pEventData )
+{
+	assert( pEventData->GetType() == Events::EventType_Quit );
+	delete g_pApplication;
+}
+
 };

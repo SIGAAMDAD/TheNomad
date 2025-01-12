@@ -3,6 +3,7 @@
 #define VMA_IMPLEMENTATION
 #include <vk_mem_alloc.h>
 #include <Engine/Core/Util.h>
+#include "VulkanShader.h"
 
 PFN_vkCreateSwapchainKHR fn_vkCreateSwapchainKHR = NULL;
 PFN_vkCmdPushDescriptorSetKHR fn_vkCmdPushDescriptorSetKHR = NULL;
@@ -111,6 +112,8 @@ void VkError( const char *pCall, VkResult nResult )
 namespace SIREngine::RenderLib::Vulkan {
 
 SIRENGINE_DEFINE_LOG_CATEGORY( VulkanBackend, ELogLevel::Info );
+
+static VKShader s_GenericShader;
 
 typedef struct {
 	VkSurfaceCapabilitiesKHR capabilities;
@@ -353,6 +356,10 @@ const QueueFamilyIndices_t FindQueueFamilies( void )
 	return indices;
 }
 
+void VKContext::RegisterBackendCvars( void )
+{
+}
+
 bool VKContext::CreateWindow( void )
 {
 	Uint32 flags;
@@ -361,14 +368,19 @@ bool VKContext::CreateWindow( void )
 	g_pVKContext = dynamic_cast<VKContext *>( g_pContext );
 
 	flags = SDL_WINDOW_VULKAN;
-	nBorderMode = r_WindowMode.GetValue();
+	nBorderMode = vid_WindowMode.GetValue();
+
+	SDL_Vulkan_LoadLibrary( NULL );
 
 	if ( !( nBorderMode % 2 ) ) {
 		// its borderless
+		SIRENGINE_LOG_LEVEL( RenderBackend, ELogLevel::Info, "Creating borderless window." );
 		flags |= SDL_WINDOW_BORDERLESS;
 	}
-	if ( r_WindowMode.GetValue() > (uint32_t)EWindowMode::Fullscreen ) {
+	if ( vid_WindowMode.GetValue() >= (uint32_t)EWindowMode::Fullscreen ) {
+		SIRENGINE_LOG_LEVEL( RenderBackend, ELogLevel::Info, "Creating fullscreen window." );
 		flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
+	} else {
 	}
 	flags |= SDL_WINDOW_SHOWN;
 
@@ -462,9 +474,10 @@ bool VKContext::CreateWindow( void )
 	InitPhysicalDevice();
 	InitLogicalDevice();
 	InitSwapChain();
-	CreateFixedFunctionPipeline();
 	InitRenderPass();
+	CreateFixedFunctionPipeline();
 	InitCommandBuffer();
+	InitSyncObjects();
 
 	return true;
 }
@@ -518,7 +531,7 @@ VkPresentModeKHR ChooseSwapPresentMode( const VkPresentModeKHR *pAvailablePresen
 {
 	VkPresentModeKHR desiredPresentMode;
 
-	switch ( r_VSync.GetValue() ) {
+	switch ( vid_VSync.GetValue() ) {
 	case -1:
 		desiredPresentMode = VK_PRESENT_MODE_FIFO_RELAXED_KHR;
 		break;
@@ -690,6 +703,7 @@ void VKContext::InitLogicalDevice( void )
 	VK_CALL( vkCreateDevice( m_hPhysicalDevice, &createInfo, NULL, &m_hDevice ) );
 
 	vkGetDeviceQueue( m_hDevice, indices.nGraphicsFamily, 0, &m_hGraphicsQueue );
+	vkGetDeviceQueue( m_hDevice, indices.nPresentFamily, 0, &m_hPresentQueue );
 
 	{
 		VmaAllocatorCreateInfo allocatorInfo;
@@ -810,25 +824,11 @@ void VKContext::CreateFixedFunctionPipeline( void )
 		VK_DYNAMIC_STATE_SCISSOR
 	};
 
-	VkPipelineDynamicStateCreateInfo createInfo;
-	memset( &createInfo, 0, sizeof( createInfo ) );
-	createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
-	createInfo.pDynamicStates = dynamicStates;
-	createInfo.dynamicStateCount = SIREngine_StaticArrayLength( dynamicStates );
-
-	VkPipelineVertexInputStateCreateInfo vertexInputInfo;
-	memset( &vertexInputInfo, 0, sizeof( vertexInputInfo ) );
-	vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-	vertexInputInfo.vertexBindingDescriptionCount = 0;
-	vertexInputInfo.pVertexBindingDescriptions = NULL; // optional
-	vertexInputInfo.vertexAttributeDescriptionCount = 0;
-	vertexInputInfo.pVertexAttributeDescriptions = NULL; // optional
-
-	VkPipelineInputAssemblyStateCreateInfo inputAssembly;
-	memset( &inputAssembly, 0, sizeof( inputAssembly ) );
-	inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-	inputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-	inputAssembly.primitiveRestartEnable = VK_FALSE;
+	VkPipelineDynamicStateCreateInfo dynamicState;
+	memset( &dynamicState, 0, sizeof( dynamicState ) );
+	dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+	dynamicState.pDynamicStates = dynamicStates;
+	dynamicState.dynamicStateCount = SIREngine_StaticArrayLength( dynamicStates );
 
 	VkViewport viewport;
 	memset( &viewport, 0, sizeof( viewport ) );
@@ -847,7 +847,9 @@ void VKContext::CreateFixedFunctionPipeline( void )
 	memset( &viewportState,  0, sizeof( viewportState ) );
 	viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
 	viewportState.viewportCount = 1;
+	viewportState.pViewports = &viewport;
 	viewportState.scissorCount = 1;
+	viewportState.pScissors = &scissor;
 
 	VkPipelineRasterizationStateCreateInfo rasterizer;
 	memset( &rasterizer, 0, sizeof( rasterizer ) );
@@ -858,7 +860,7 @@ void VKContext::CreateFixedFunctionPipeline( void )
 	rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
 	rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
 	rasterizer.depthBiasEnable = VK_FALSE;
-
+	rasterizer.lineWidth = 1.0f;
 
 	VkPipelineMultisampleStateCreateInfo multisampling;
 	memset( &multisampling, 0, sizeof( multisampling ) );
@@ -881,6 +883,18 @@ void VKContext::CreateFixedFunctionPipeline( void )
 	colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO; // Optional
 	colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD; // Optional
 
+	VkPipelineColorBlendStateCreateInfo colorBlending;
+	memset( &colorBlending, 0, sizeof( colorBlending ) );
+	colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+	colorBlending.logicOpEnable = VK_FALSE;
+	colorBlending.logicOp = VK_LOGIC_OP_COPY;
+	colorBlending.attachmentCount = 1;
+	colorBlending.pAttachments = &colorBlendAttachment;
+	colorBlending.blendConstants[0] = 0.0f;
+	colorBlending.blendConstants[1] = 0.0f;
+	colorBlending.blendConstants[2] = 0.0f;
+	colorBlending.blendConstants[3] = 0.0f;
+
 	VkPipelineLayoutCreateInfo pipelineLayoutInfo;
 	memset( &pipelineLayoutInfo, 0, sizeof( pipelineLayoutInfo ) );
 	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
@@ -889,7 +903,65 @@ void VKContext::CreateFixedFunctionPipeline( void )
 	pipelineLayoutInfo.pushConstantRangeCount = 0; // Optional
 	pipelineLayoutInfo.pPushConstantRanges = NULL; // Optional
 
+	if ( !s_GenericShader.Compile( "Generic" ) ) {
+		SIRENGINE_LOG_LEVEL( VulkanBackend, ELogLevel::Fatal, "Error compiling vulkan shader!" );
+	}
+
+	VkPipelineShaderStageCreateInfo vertexInfo;
+	memset( &vertexInfo, 0, sizeof( vertexInfo ) );
+	vertexInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+	vertexInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
+	vertexInfo.module = s_GenericShader.GetVertexModule();
+	vertexInfo.pName = "main";
+
+	VkPipelineShaderStageCreateInfo fragmentInfo;
+	memset( &fragmentInfo, 0, sizeof( fragmentInfo ) );
+	fragmentInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+	fragmentInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+	fragmentInfo.module = s_GenericShader.GetFragmentModule();
+	fragmentInfo.pName = "main";
+
+	VkPipelineShaderStageCreateInfo shaderStages[] = {
+		vertexInfo,
+		fragmentInfo
+	};
+
+	VkPipelineVertexInputStateCreateInfo vertexInputInfo;
+	memset( &vertexInputInfo, 0, sizeof( vertexInputInfo ) );
+	vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+	vertexInputInfo.vertexBindingDescriptionCount = 0;
+	vertexInputInfo.pVertexBindingDescriptions = NULL; // optional
+	vertexInputInfo.vertexAttributeDescriptionCount = 0;
+	vertexInputInfo.pVertexAttributeDescriptions = NULL; // optional
+
+	VkPipelineInputAssemblyStateCreateInfo inputAssembly;
+	memset( &inputAssembly, 0, sizeof( inputAssembly ) );
+	inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+	inputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+	inputAssembly.primitiveRestartEnable = VK_FALSE;
+
+	SIRENGINE_LOG_LEVEL( VulkanBackend, ELogLevel::Info, "Creating pipeline layout..." );
 	VK_CALL( vkCreatePipelineLayout( m_hDevice, &pipelineLayoutInfo, NULL, &m_hPipelineLayout ) );
+
+	VkGraphicsPipelineCreateInfo pipelineInfo;
+	memset( &pipelineInfo, 0, sizeof( pipelineInfo ) );
+	pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+	pipelineInfo.stageCount = 2;
+	pipelineInfo.pStages = shaderStages;
+	pipelineInfo.pVertexInputState = &vertexInputInfo;
+	pipelineInfo.pInputAssemblyState = &inputAssembly;
+	pipelineInfo.pViewportState = &viewportState;
+	pipelineInfo.pRasterizationState = &rasterizer;
+	pipelineInfo.pMultisampleState = &multisampling;
+	pipelineInfo.pColorBlendState = &colorBlending;
+	pipelineInfo.pDynamicState = &dynamicState;
+	pipelineInfo.layout = m_hPipelineLayout;
+	pipelineInfo.renderPass = m_hRenderPass;
+	pipelineInfo.subpass = 0;
+	pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
+
+	SIRENGINE_LOG_LEVEL( VulkanBackend, ELogLevel::Info, "Creating graphics pipeline..." );
+	VK_CALL( vkCreateGraphicsPipelines( m_hDevice, VK_NULL_HANDLE, 1, &pipelineInfo, NULL, &m_hPipeline ) );
 }
 
 void VKContext::InitRenderPass( void )
@@ -918,6 +990,15 @@ void VKContext::InitRenderPass( void )
 	subpass.colorAttachmentCount = 1;
 	subpass.pColorAttachments = &colorAttachmentRef;
 
+	VkSubpassDependency dependency;
+	memset( &dependency, 0, sizeof( dependency ) );
+	dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+	dependency.dstSubpass = 0;
+	dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	dependency.srcAccessMask = 0;
+	dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
 	VkRenderPassCreateInfo renderPassInfo;
 	memset( &renderPassInfo, 0, sizeof( renderPassInfo ) );
 	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
@@ -925,6 +1006,8 @@ void VKContext::InitRenderPass( void )
 	renderPassInfo.pAttachments = &colorAttachment;
 	renderPassInfo.subpassCount = 1;
 	renderPassInfo.pSubpasses = &subpass;
+	renderPassInfo.dependencyCount = 1;
+	renderPassInfo.pDependencies = &dependency;
 
 	VK_CALL( vkCreateRenderPass( m_hDevice, &renderPassInfo, NULL, &m_hRenderPass ) );
 	SIRENGINE_LOG_LEVEL( VulkanBackend, ELogLevel::Info, "Done." );
@@ -971,15 +1054,141 @@ void VKContext::InitCommandBuffer( void )
 	allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 	allocInfo.commandPool = m_hCommandPool;
 	allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-	allocInfo.commandBufferCount = 1;
+	allocInfo.commandBufferCount = VK_MAX_FRAMES_IN_FLIGHT;
 
 	VK_CALL( vkAllocateCommandBuffers( m_hDevice, &allocInfo, m_hCommandBuffers ) );
 
 	SIRENGINE_LOG_LEVEL( VulkanBackend, ELogLevel::Info, "Vulkan CommandBuffer backend initialized." );
 }
 
+void VKContext::InitSyncObjects( void )
+{
+	VkSemaphoreCreateInfo createInfo;
+	memset( &createInfo, 0, sizeof( createInfo ) );
+	createInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+	VkFenceCreateInfo fenceInfo;
+	memset( &fenceInfo, 0, sizeof( fenceInfo ) );
+	fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+	fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+
+	for ( uint32_t i = 0; i < VK_MAX_FRAMES_IN_FLIGHT; i++ ) {
+		VK_CALL( vkCreateSemaphore( m_hDevice, &createInfo, NULL, &m_hImageAvailableSemaphore[i] ) );
+		VK_CALL( vkCreateSemaphore( m_hDevice, &createInfo, NULL, &m_hRenderFinishedSemaphore[i] ) );
+		VK_CALL( vkCreateFence( m_hDevice, &fenceInfo, NULL, &m_hInFlightFences[i] ) );
+	}
+}
+
+void VKContext::BeginFrame( void )
+{
+	static uint32_t nCurrentFrame = 0;
+
+	vkWaitForFences( m_hDevice, 1, &m_hInFlightFences[ nCurrentFrame ], VK_TRUE, SIRENGINE_UINT64_MAX );
+	vkResetFences( m_hDevice, 1, &m_hInFlightFences[ nCurrentFrame ] );
+
+	uint32_t nImageIndex;
+	vkAcquireNextImageKHR( m_hDevice, m_hSwapChain, SIRENGINE_UINT64_MAX, m_hImageAvailableSemaphore[ nCurrentFrame ], VK_NULL_HANDLE, &nImageIndex );
+
+	vkResetCommandBuffer( m_hCommandBuffers[ nCurrentFrame ], 0 );
+	RecordCommandBuffer( m_hCommandBuffers[ nCurrentFrame ], nImageIndex );
+
+	VkSubmitInfo submitInfo;
+	memset( &submitInfo, 0, sizeof( submitInfo ) );
+	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+	VkSemaphore waitSemaphores[] = { m_hImageAvailableSemaphore[ nCurrentFrame ] };
+	VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+	submitInfo.waitSemaphoreCount = 1;
+	submitInfo.pWaitSemaphores = waitSemaphores;
+	submitInfo.pWaitDstStageMask = waitStages;
+
+	submitInfo.commandBufferCount = 1;
+	submitInfo.pCommandBuffers = &m_hCommandBuffers[ nCurrentFrame ];
+
+	VkSemaphore signalSemaphores[] = { m_hRenderFinishedSemaphore[ nCurrentFrame ] };
+	submitInfo.signalSemaphoreCount = 1;
+	submitInfo.pSignalSemaphores = signalSemaphores;
+
+	VK_CALL( vkQueueSubmit( m_hGraphicsQueue, 1, &submitInfo, m_hInFlightFences[ nCurrentFrame ] ) );
+
+	VkPresentInfoKHR presentInfo;
+	memset( &presentInfo, 0, sizeof( presentInfo ) );
+	presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+	presentInfo.waitSemaphoreCount = 1;
+	presentInfo.pWaitSemaphores = waitSemaphores;
+
+	VkSwapchainKHR swapChains[] = { m_hSwapChain };
+	presentInfo.swapchainCount = 1;
+	presentInfo.pSwapchains = swapChains;
+
+	presentInfo.pImageIndices = &nImageIndex;
+
+	vkQueuePresentKHR( m_hPresentQueue, &presentInfo );
+
+	nCurrentFrame = ( nCurrentFrame + 1 ) % VK_MAX_FRAMES_IN_FLIGHT;
+}
+
+void VKContext::EndFrame( void )
+{
+}
+
+void VKContext::RecordCommandBuffer( VkCommandBuffer hCommandBuffer, uint32_t nImageIndex )
+{
+	VkCommandBufferBeginInfo beginInfo;
+	memset( &beginInfo, 0, sizeof( beginInfo ) );
+	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+	beginInfo.flags = 0;
+	beginInfo.pInheritanceInfo = NULL;
+
+	VK_CALL( vkBeginCommandBuffer( hCommandBuffer, &beginInfo ) );
+
+	VkRenderPassBeginInfo renderPassInfo;
+	memset( &renderPassInfo, 0, sizeof( renderPassInfo ) );
+	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+	renderPassInfo.renderPass = m_hRenderPass;
+	renderPassInfo.framebuffer = m_SwapChainFramebuffers[ nImageIndex ];
+	renderPassInfo.renderArea.offset = { 0, 0 };
+	renderPassInfo.renderArea.extent = m_nSwapChainExtent;
+
+	const VkClearValue clearColor = { { { 0.0f, 0.0f, 0.0f, 1.0f } } };
+	renderPassInfo.clearValueCount = 1;
+	renderPassInfo.pClearValues = &clearColor;
+	
+	vkCmdBeginRenderPass( hCommandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE );
+
+	vkCmdBindPipeline( hCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_hPipeline );
+
+	VkViewport viewport;
+	viewport.x = 0.0f;
+	viewport.y = 0.0f;
+	viewport.width = m_nSwapChainExtent.width;
+	viewport.height = m_nSwapChainExtent.height;
+	viewport.minDepth = 0.0f;
+	viewport.maxDepth = 1.0f;
+	vkCmdSetViewport( hCommandBuffer, 0, 1, &viewport );
+
+	VkRect2D scissor;
+	scissor.offset = { 0, 0 };
+	scissor.extent = m_nSwapChainExtent;
+	vkCmdSetScissor( hCommandBuffer, 0, 1, &scissor );
+
+	vkCmdDraw( hCommandBuffer, 3, 1, 0, 0 );
+
+	vkCmdEndRenderPass( hCommandBuffer );
+
+	VK_CALL( vkEndCommandBuffer( hCommandBuffer ) );
+}
+
 void VKContext::ShutdownBackend( void )
 {
+	vkDeviceWaitIdle( m_hDevice );
+
+	vkDestroyPipeline( m_hDevice, m_hPipeline, NULL );
+	for ( uint32_t i = 0; i < VK_MAX_FRAMES_IN_FLIGHT; i++ ) {
+		vkDestroySemaphore( m_hDevice, m_hImageAvailableSemaphore[i], NULL );
+	vkDestroySemaphore( m_hDevice, m_hRenderFinishedSemaphore[i], NULL );
+	vkDestroyFence( m_hDevice, m_hInFlightFences[i], NULL );
+	}
 	vkDestroyCommandPool( m_hDevice, m_hCommandPool, NULL );
 	for ( auto& it : m_SwapChainFramebuffers ) {
 		vkDestroyFramebuffer( m_hDevice, it, NULL );
@@ -993,6 +1202,8 @@ void VKContext::ShutdownBackend( void )
 	vkDestroySurfaceKHR( m_hInstance, m_hSurface, NULL );
 	vkDestroyDevice( m_hDevice, NULL );
 	vkDestroyInstance( m_hInstance, NULL );
+
+	SDL_Vulkan_UnloadLibrary();
 }
 
 };

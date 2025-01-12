@@ -118,7 +118,6 @@ namespace SIREngine {
 		eastl::vector<CString> m_HistoryEntries;
 
 		const char *m_pSavedLocale;
-		Serialization::CIniSerializer *m_pConfigLoader;
 	};
 
 	extern CConsoleManager *g_pConsoleManager;
