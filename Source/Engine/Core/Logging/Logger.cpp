@@ -1,3 +1,4 @@
+#include <Engine/Core/Core.h>
 #include "Logger.h"
 #include <Engine/Core/Util.h>
 #include <boost/lockfree/queue.hpp>

@@ -31,6 +31,11 @@ add_definitions(-DSIRENGINE_BUILD_TYPE=0)
 
 # Source files
 set(SOURCE_FILES
+	Source/Engine/RenderLib/Backend/RenderContext.h
+	Source/Engine/RenderLib/Backend/RenderContext.cpp
+	Source/Engine/RenderLib/Backend/Vulkan/VulkanCommon.h
+	Source/Engine/RenderLib/Backend/Vulkan/VulkanContext.h
+	Source/Engine/RenderLib/Backend/Vulkan/VulkanContext.cpp
 	Source/Engine/Core/Pch.h
 	Source/Engine/Core/Platform.h
 	Source/Engine/Core/Types.h

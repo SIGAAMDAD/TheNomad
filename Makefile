@@ -523,6 +523,54 @@ Source/Engine/Core/Util.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/Core/Util.cpp.s
 .PHONY : Source/Engine/Core/Util.cpp.s
 
+Source/Engine/RenderLib/Backend/RenderContext.o: Source/Engine/RenderLib/Backend/RenderContext.cpp.o
+.PHONY : Source/Engine/RenderLib/Backend/RenderContext.o
+
+# target to build an object file
+Source/Engine/RenderLib/Backend/RenderContext.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/RenderLib/Backend/RenderContext.cpp.o
+.PHONY : Source/Engine/RenderLib/Backend/RenderContext.cpp.o
+
+Source/Engine/RenderLib/Backend/RenderContext.i: Source/Engine/RenderLib/Backend/RenderContext.cpp.i
+.PHONY : Source/Engine/RenderLib/Backend/RenderContext.i
+
+# target to preprocess a source file
+Source/Engine/RenderLib/Backend/RenderContext.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/RenderLib/Backend/RenderContext.cpp.i
+.PHONY : Source/Engine/RenderLib/Backend/RenderContext.cpp.i
+
+Source/Engine/RenderLib/Backend/RenderContext.s: Source/Engine/RenderLib/Backend/RenderContext.cpp.s
+.PHONY : Source/Engine/RenderLib/Backend/RenderContext.s
+
+# target to generate assembly for a file
+Source/Engine/RenderLib/Backend/RenderContext.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/RenderLib/Backend/RenderContext.cpp.s
+.PHONY : Source/Engine/RenderLib/Backend/RenderContext.cpp.s
+
+Source/Engine/RenderLib/Backend/Vulkan/VulkanContext.o: Source/Engine/RenderLib/Backend/Vulkan/VulkanContext.cpp.o
+.PHONY : Source/Engine/RenderLib/Backend/Vulkan/VulkanContext.o
+
+# target to build an object file
+Source/Engine/RenderLib/Backend/Vulkan/VulkanContext.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/RenderLib/Backend/Vulkan/VulkanContext.cpp.o
+.PHONY : Source/Engine/RenderLib/Backend/Vulkan/VulkanContext.cpp.o
+
+Source/Engine/RenderLib/Backend/Vulkan/VulkanContext.i: Source/Engine/RenderLib/Backend/Vulkan/VulkanContext.cpp.i
+.PHONY : Source/Engine/RenderLib/Backend/Vulkan/VulkanContext.i
+
+# target to preprocess a source file
+Source/Engine/RenderLib/Backend/Vulkan/VulkanContext.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/RenderLib/Backend/Vulkan/VulkanContext.cpp.i
+.PHONY : Source/Engine/RenderLib/Backend/Vulkan/VulkanContext.cpp.i
+
+Source/Engine/RenderLib/Backend/Vulkan/VulkanContext.s: Source/Engine/RenderLib/Backend/Vulkan/VulkanContext.cpp.s
+.PHONY : Source/Engine/RenderLib/Backend/Vulkan/VulkanContext.s
+
+# target to generate assembly for a file
+Source/Engine/RenderLib/Backend/Vulkan/VulkanContext.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/RenderLib/Backend/Vulkan/VulkanContext.cpp.s
+.PHONY : Source/Engine/RenderLib/Backend/Vulkan/VulkanContext.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -579,6 +627,12 @@ help:
 	@echo "... Source/Engine/Core/Util.o"
 	@echo "... Source/Engine/Core/Util.i"
 	@echo "... Source/Engine/Core/Util.s"
+	@echo "... Source/Engine/RenderLib/Backend/RenderContext.o"
+	@echo "... Source/Engine/RenderLib/Backend/RenderContext.i"
+	@echo "... Source/Engine/RenderLib/Backend/RenderContext.s"
+	@echo "... Source/Engine/RenderLib/Backend/Vulkan/VulkanContext.o"
+	@echo "... Source/Engine/RenderLib/Backend/Vulkan/VulkanContext.i"
+	@echo "... Source/Engine/RenderLib/Backend/Vulkan/VulkanContext.s"
 .PHONY : help
 
 

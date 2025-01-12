@@ -29,6 +29,8 @@ bool CreateDirectory( const char *pDirectory );
 size_t FileWrite( const void *pBuffer, size_t nBytes, FileHandle_t hFile );
 size_t FileRead( void *pBuffer, size_t nBytes, FileHandle_t hFile );
 const CFilePath& GetCurrentPath( void );
+const eastl::vector<CString>& GetCommandLine( void );
+bool CheckCommandParm( const CString& name );
 eastl::vector<CFilePath> ListFiles( const CFilePath& directory, bool bDirectoryOnly );
 
 extern IGenericApplication *g_pApplication;

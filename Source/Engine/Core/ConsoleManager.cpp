@@ -1,3 +1,4 @@
+#include <Engine/Core/Core.h>
 #include "Util.h"
 #include "ConsoleManager.h"
 #include <Engine/Core/Serialization/Ini/IniSerializer.h>

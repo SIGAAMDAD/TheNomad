@@ -5,6 +5,7 @@
 #include <Engine/Core/Logging/Logger.h>
 #include <Engine/Core/FileSystem/FileSystem.h>
 #include <Engine/Core/ConsoleManager.h>
+#include <Engine/RenderLib/Backend/RenderContext.h>
 #include <sys/stat.h>
 #include <errno.h>
 #include <libgen.h>
@@ -13,6 +14,7 @@
 namespace SIREngine::System {
 
 static CFilePath CurrentPath;
+static eastl::vector<CString> CommandLine;
 
 SIRENGINE_DEFINE_LOG_CATEGORY( System, ELogLevel::Info );
 
@@ -74,9 +76,19 @@ void PosixApplication::Init( void )
 	static CConsoleManager consoleManager;
 	g_pConsoleManager = &consoleManager;
 
+	RenderLib::ContextInfo_t contextInfo;
+	contextInfo.pszWindowName = "TheNomad v1.2.0";
+	contextInfo.nWindowPositionX = 0;
+	contextInfo.nWindowPositionY = 0;
+	contextInfo.nWindowWidth = 1280;
+	contextInfo.nWindowHeight = 720;
+	contextInfo.nAppVersion = SIRENGINE_MAKE_VERSION( 1, 2, 0 );
+
 	GetCurrentPath();
 
 	g_pFileSystem->Init();
+
+	RenderLib::IRenderContext *pRenderContext = RenderLib::IRenderContext::CreateContext( contextInfo );
 
 	CLogManager::LaunchLoggingThread();
 	g_pConsoleManager->LoadConfig( "config.ini" );
@@ -137,18 +149,27 @@ eastl::vector<CFilePath> ListFiles( const CFilePath& directory, bool bDirectoryO
 	return files;
 };
 
+const eastl::vector<CString>& GetCommandLine( void )
+{
+	return CommandLine;
+}
+
+bool CheckCommandParm( const CString& name )
+{
+	return eastl::find( CommandLine.cbegin(), CommandLine.cend(), name ) != CommandLine.cend();
+}
+
 };
 
 int main( int argc, char **argv )
 {
-	eastl::vector<CString> commandLine;
+	using namespace SIREngine::System;
 
-	commandLine.reserve( argc );
+	CommandLine.reserve( argc );
 	for ( int i = 0; i < argc; i++ ) {
-		commandLine.emplace_back( argv[i] );
+		CommandLine.emplace_back( argv[i] );
 	}
 
-	using namespace SIREngine::System;
 	g_pApplication = new PosixApplication();
 
 	seteuid( getuid() );
