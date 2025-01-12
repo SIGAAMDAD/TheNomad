@@ -315,7 +315,7 @@ static void *Vulkan_Reallocate( void *pUserData, void *pOriginal, size_t nSize, 
 }
 
 VKContext::VKContext( const ContextInfo_t& contextInfo )
-	: IRenderContext()
+	: IRenderContext(), m_nCurrentFrame( 0 )
 {
 	m_ContextData = contextInfo;
 }
@@ -364,6 +364,8 @@ bool VKContext::CreateWindow( void )
 {
 	Uint32 flags;
 	uint32_t nBorderMode;
+
+	m_nCurrentFrame = 0;
 
 	g_pVKContext = dynamic_cast<VKContext *>( g_pContext );
 
@@ -1081,55 +1083,52 @@ void VKContext::InitSyncObjects( void )
 
 void VKContext::BeginFrame( void )
 {
-	static uint32_t nCurrentFrame = 0;
+	vkWaitForFences( m_hDevice, 1, &m_hInFlightFences[ m_nCurrentFrame ], VK_TRUE, SIRENGINE_UINT64_MAX );
+	vkResetFences( m_hDevice, 1, &m_hInFlightFences[ m_nCurrentFrame ] );
 
-	vkWaitForFences( m_hDevice, 1, &m_hInFlightFences[ nCurrentFrame ], VK_TRUE, SIRENGINE_UINT64_MAX );
-	vkResetFences( m_hDevice, 1, &m_hInFlightFences[ nCurrentFrame ] );
+	vkAcquireNextImageKHR( m_hDevice, m_hSwapChain, SIRENGINE_UINT64_MAX, m_hImageAvailableSemaphore[ m_nCurrentFrame ], VK_NULL_HANDLE, &m_nImageIndex );
 
-	uint32_t nImageIndex;
-	vkAcquireNextImageKHR( m_hDevice, m_hSwapChain, SIRENGINE_UINT64_MAX, m_hImageAvailableSemaphore[ nCurrentFrame ], VK_NULL_HANDLE, &nImageIndex );
+	vkResetCommandBuffer( m_hCommandBuffers[ m_nCurrentFrame ], 0 );
+	RecordCommandBuffer( m_hCommandBuffers[ m_nCurrentFrame ], m_nImageIndex );
+}
 
-	vkResetCommandBuffer( m_hCommandBuffers[ nCurrentFrame ], 0 );
-	RecordCommandBuffer( m_hCommandBuffers[ nCurrentFrame ], nImageIndex );
-
+void VKContext::EndFrame( void )
+{
 	VkSubmitInfo submitInfo;
 	memset( &submitInfo, 0, sizeof( submitInfo ) );
 	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-	VkSemaphore waitSemaphores[] = { m_hImageAvailableSemaphore[ nCurrentFrame ] };
+	VkSemaphore waitSemaphores[] = { m_hImageAvailableSemaphore[ m_nCurrentFrame ] };
 	VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
 	submitInfo.waitSemaphoreCount = 1;
 	submitInfo.pWaitSemaphores = waitSemaphores;
 	submitInfo.pWaitDstStageMask = waitStages;
 
 	submitInfo.commandBufferCount = 1;
-	submitInfo.pCommandBuffers = &m_hCommandBuffers[ nCurrentFrame ];
+	submitInfo.pCommandBuffers = &m_hCommandBuffers[ m_nCurrentFrame ];
 
-	VkSemaphore signalSemaphores[] = { m_hRenderFinishedSemaphore[ nCurrentFrame ] };
+	VkSemaphore signalSemaphores[] = { m_hRenderFinishedSemaphore[ m_nCurrentFrame ] };
 	submitInfo.signalSemaphoreCount = 1;
 	submitInfo.pSignalSemaphores = signalSemaphores;
 
-	VK_CALL( vkQueueSubmit( m_hGraphicsQueue, 1, &submitInfo, m_hInFlightFences[ nCurrentFrame ] ) );
+	VK_CALL( vkQueueSubmit( m_hGraphicsQueue, 1, &submitInfo, m_hInFlightFences[ m_nCurrentFrame ] ) );
 
 	VkPresentInfoKHR presentInfo;
 	memset( &presentInfo, 0, sizeof( presentInfo ) );
 	presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+	
 	presentInfo.waitSemaphoreCount = 1;
-	presentInfo.pWaitSemaphores = waitSemaphores;
+	presentInfo.pWaitSemaphores = signalSemaphores;
 
 	VkSwapchainKHR swapChains[] = { m_hSwapChain };
 	presentInfo.swapchainCount = 1;
 	presentInfo.pSwapchains = swapChains;
 
-	presentInfo.pImageIndices = &nImageIndex;
+	presentInfo.pImageIndices = &m_nImageIndex;
 
 	vkQueuePresentKHR( m_hPresentQueue, &presentInfo );
 
-	nCurrentFrame = ( nCurrentFrame + 1 ) % VK_MAX_FRAMES_IN_FLIGHT;
-}
-
-void VKContext::EndFrame( void )
-{
+	m_nCurrentFrame = ( m_nCurrentFrame + 1 ) % VK_MAX_FRAMES_IN_FLIGHT;
 }
 
 void VKContext::RecordCommandBuffer( VkCommandBuffer hCommandBuffer, uint32_t nImageIndex )
@@ -1137,7 +1136,6 @@ void VKContext::RecordCommandBuffer( VkCommandBuffer hCommandBuffer, uint32_t nI
 	VkCommandBufferBeginInfo beginInfo;
 	memset( &beginInfo, 0, sizeof( beginInfo ) );
 	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-	beginInfo.flags = 0;
 	beginInfo.pInheritanceInfo = NULL;
 
 	VK_CALL( vkBeginCommandBuffer( hCommandBuffer, &beginInfo ) );

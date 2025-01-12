@@ -65,6 +65,9 @@ private:
 
 	VkQueue m_hGraphicsQueue;
 	VkQueue m_hPresentQueue;
+
+	uint32_t m_nCurrentFrame;
+	uint32_t m_nImageIndex;
 };
 
 extern VKContext *g_pVKContext;
