@@ -109,6 +109,7 @@ target_link_libraries(TheNomad.x64
 	-lvulkan
 	${CMAKE_SOURCE_DIR}/libEASTL.a
 	${CMAKE_SOURCE_DIR}/ThirdParty/DLSS/lib/Linux_x86_64/libnvsdk_ngx.a
+	-lmimalloc
 	-lbacktrace
 	-lfreetype
 	-lSDL2

@@ -8,6 +8,7 @@
 #include <nvsdk_ngx.h>
 #include <nvsdk_ngx_vk.h>
 #include <nvsdk_ngx_helpers_vk.h>
+#include <mimalloc-1.9/mimalloc.h>
 
 PFN_vkCreateSwapchainKHR fn_vkCreateSwapchainKHR = NULL;
 PFN_vkCmdPushDescriptorSetKHR fn_vkCmdPushDescriptorSetKHR = NULL;
@@ -119,6 +120,8 @@ SIRENGINE_DEFINE_LOG_CATEGORY( VulkanBackend, ELogLevel::Info );
 
 static VKBuffer s_VertexBuffer;
 static VKBuffer s_IndexBuffer;
+
+VkAllocationCallbacks VKContext::AllocationCallbacks;
 
 typedef struct {
 	VkSurfaceCapabilitiesKHR capabilities;
@@ -302,21 +305,17 @@ VKContext *g_pVKContext;
 
 static void *Vulkan_Allocate( void *pUserData, size_t nSize, size_t nAlignment, VkSystemAllocationScope scope )
 {
-	void *pBuffer;
-	pBuffer = malloc( nSize );
-	return pBuffer;
+	return mi_malloc_aligned( nSize, nAlignment );
 }
 
 static void Vulkan_Free( void *pUserData, void *pMemory )
 {
-	::free( pMemory );
+	mi_free( pMemory );
 }
 
 static void *Vulkan_Reallocate( void *pUserData, void *pOriginal, size_t nSize, size_t nAlignment, VkSystemAllocationScope scope )
 {
-	void *pBuffer;
-	pBuffer = realloc( pOriginal, nSize );
-	return pBuffer;
+	return mi_realloc_aligned( pOriginal, nSize, nAlignment );
 }
 
 VKContext::VKContext( const ContextInfo_t& contextInfo )
@@ -411,6 +410,10 @@ bool VKContext::CreateWindow( void )
 	createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 	createInfo.pApplicationInfo = &appInfo;
 
+	AllocationCallbacks.pfnAllocation = Vulkan_Allocate;
+	AllocationCallbacks.pfnFree = Vulkan_Free;
+	AllocationCallbacks.pfnReallocation = Vulkan_Reallocate;
+
 	// create instance && device
 	{
 		uint32_t nExtensionCount, i;
@@ -454,7 +457,7 @@ bool VKContext::CreateWindow( void )
 		createInfo.enabledLayerCount = SIREngine_StaticArrayLength( szLayers );
 		createInfo.ppEnabledLayerNames = szLayers;
 
-		VK_CALL( vkCreateInstance( &createInfo, NULL, &m_hInstance ) );
+		VK_CALL( vkCreateInstance( &createInfo, &AllocationCallbacks, &m_hInstance ) );
 		SIRENGINE_LOG_LEVEL( VulkanBackend, ELogLevel::Info, "VkInstance created." );
 
 		if ( !SDL_Vulkan_CreateSurface( m_pWindow, m_hInstance, &m_hSurface ) ) {
@@ -707,7 +710,7 @@ void VKContext::InitLogicalDevice( void )
 	createInfo.enabledLayerCount = SIREngine_StaticArrayLength( szLayers );
 	createInfo.ppEnabledLayerNames = szLayers;
 
-	VK_CALL( vkCreateDevice( m_hPhysicalDevice, &createInfo, NULL, &m_hDevice ) );
+	VK_CALL( vkCreateDevice( m_hPhysicalDevice, &createInfo, &AllocationCallbacks, &m_hDevice ) );
 
 	vkGetDeviceQueue( m_hDevice, indices.nGraphicsFamily, 0, &m_hGraphicsQueue );
 	vkGetDeviceQueue( m_hDevice, indices.nPresentFamily, 0, &m_hPresentQueue );
@@ -737,10 +740,6 @@ void VKContext::InitLogicalDevice( void )
 		allocatorInfo.flags = VMA_ALLOCATOR_CREATE_KHR_DEDICATED_ALLOCATION_BIT;
 	
 		VK_CALL( vmaCreateAllocator( &allocatorInfo, &m_hAllocator ) );
-
-		//AllocationCallbacks.pfnAllocation = Vulkan_Allocate;
-		//AllocationCallbacks.pfnFree = Vulkan_Free;
-		//AllocationCallbacks.pfnReallocation = Vulkan_Reallocate;
 	}
 }
 
@@ -790,7 +789,7 @@ void VKContext::InitSwapChain( void )
 	createInfo.oldSwapchain = VK_NULL_HANDLE;
 
 	SIRENGINE_LOG_LEVEL( VulkanBackend, ELogLevel::Info, "Allocating vulkan swapchain..." );
-	VK_CALL( vkCreateSwapchainKHR( m_hDevice, &createInfo, NULL, &m_hSwapChain ) );
+	VK_CALL( vkCreateSwapchainKHR( m_hDevice, &createInfo, &AllocationCallbacks, &m_hSwapChain ) );
 	SIRENGINE_LOG_LEVEL( VulkanBackend, ELogLevel::Info, "Done." );
 
 	vkGetSwapchainImagesKHR( m_hDevice, m_hSwapChain, &imageCount, NULL );
@@ -818,7 +817,7 @@ void VKContext::InitSwapChain( void )
 		imageCreateInfo.subresourceRange.baseArrayLayer = 0;
 		imageCreateInfo.subresourceRange.layerCount = 1;
 
-		VK_CALL( vkCreateImageView( m_hDevice, &imageCreateInfo, NULL, &m_SwapChainImageViews[i] ) );
+		VK_CALL( vkCreateImageView( m_hDevice, &imageCreateInfo, &AllocationCallbacks, &m_SwapChainImageViews[i] ) );
 	}
 }
 
@@ -989,7 +988,7 @@ void VKContext::CreateFixedFunctionPipeline( void )
 	inputAssembly.primitiveRestartEnable = VK_FALSE;
 
 	SIRENGINE_LOG_LEVEL( VulkanBackend, ELogLevel::Info, "Creating pipeline layout..." );
-	VK_CALL( vkCreatePipelineLayout( m_hDevice, &pipelineLayoutInfo, NULL, &m_hPipelineLayout ) );
+	VK_CALL( vkCreatePipelineLayout( m_hDevice, &pipelineLayoutInfo, &AllocationCallbacks, &m_hPipelineLayout ) );
 
 	VkGraphicsPipelineCreateInfo pipelineInfo;
 	memset( &pipelineInfo, 0, sizeof( pipelineInfo ) );
@@ -1009,7 +1008,7 @@ void VKContext::CreateFixedFunctionPipeline( void )
 	pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 
 	SIRENGINE_LOG_LEVEL( VulkanBackend, ELogLevel::Info, "Creating graphics pipeline..." );
-	VK_CALL( vkCreateGraphicsPipelines( m_hDevice, VK_NULL_HANDLE, 1, &pipelineInfo, NULL, &m_hPipeline ) );
+	VK_CALL( vkCreateGraphicsPipelines( m_hDevice, VK_NULL_HANDLE, 1, &pipelineInfo, &AllocationCallbacks, &m_hPipeline ) );
 }
 
 void VKContext::InitRenderPass( void )
@@ -1057,7 +1056,7 @@ void VKContext::InitRenderPass( void )
 	renderPassInfo.dependencyCount = 1;
 	renderPassInfo.pDependencies = &dependency;
 
-	VK_CALL( vkCreateRenderPass( m_hDevice, &renderPassInfo, NULL, &m_hRenderPass ) );
+	VK_CALL( vkCreateRenderPass( m_hDevice, &renderPassInfo, &AllocationCallbacks, &m_hRenderPass ) );
 	SIRENGINE_LOG_LEVEL( VulkanBackend, ELogLevel::Info, "Done." );
 
 	SIRENGINE_LOG_LEVEL( VulkanBackend, ELogLevel::Info, "Allocating SwapChain ImageView framebuffers..." );
@@ -1077,7 +1076,7 @@ void VKContext::InitRenderPass( void )
 		framebufferInfo.height = m_nSwapChainExtent.height;
 		framebufferInfo.layers = 1;
 
-		VK_CALL( vkCreateFramebuffer( m_hDevice, &framebufferInfo, NULL, &m_SwapChainFramebuffers[i] ) );
+		VK_CALL( vkCreateFramebuffer( m_hDevice, &framebufferInfo, &AllocationCallbacks, &m_SwapChainFramebuffers[i] ) );
 	}
 }
 
@@ -1093,7 +1092,7 @@ void VKContext::InitCommandBuffer( void )
 	poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 	poolInfo.queueFamilyIndex = indices.nGraphicsFamily;
 
-	VK_CALL( vkCreateCommandPool( m_hDevice, &poolInfo, NULL, &m_hCommandPool ) );
+	VK_CALL( vkCreateCommandPool( m_hDevice, &poolInfo, &AllocationCallbacks, &m_hCommandPool ) );
 
 	SIRENGINE_LOG_LEVEL( VulkanBackend, ELogLevel::Info, "Allocating command buffers..." );
 
@@ -1121,9 +1120,9 @@ void VKContext::InitSyncObjects( void )
 	fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
 	for ( uint32_t i = 0; i < VK_MAX_FRAMES_IN_FLIGHT; i++ ) {
-		VK_CALL( vkCreateSemaphore( m_hDevice, &createInfo, NULL, &m_hImageAvailableSemaphore[i] ) );
-		VK_CALL( vkCreateSemaphore( m_hDevice, &createInfo, NULL, &m_hRenderFinishedSemaphore[i] ) );
-		VK_CALL( vkCreateFence( m_hDevice, &fenceInfo, NULL, &m_hInFlightFences[i] ) );
+		VK_CALL( vkCreateSemaphore( m_hDevice, &createInfo, &AllocationCallbacks, &m_hImageAvailableSemaphore[i] ) );
+		VK_CALL( vkCreateSemaphore( m_hDevice, &createInfo, &AllocationCallbacks, &m_hRenderFinishedSemaphore[i] ) );
+		VK_CALL( vkCreateFence( m_hDevice, &fenceInfo, &AllocationCallbacks, &m_hInFlightFences[i] ) );
 	}
 }
 
@@ -1247,12 +1246,12 @@ void VKContext::RecreateSwapChain( void )
 	// cleanup first
 	{
 		for ( auto& it : m_SwapChainFramebuffers ) {
-			vkDestroyFramebuffer( m_hDevice, it, NULL );
+			vkDestroyFramebuffer( m_hDevice, it, &AllocationCallbacks );
 		}
 		for ( auto& it : m_SwapChainImageViews ) {
-			vkDestroyImageView( m_hDevice, it, NULL );
+			vkDestroyImageView( m_hDevice, it, &AllocationCallbacks );
 		}
-		vkDestroySwapchainKHR( m_hDevice, m_hSwapChain, NULL );
+		vkDestroySwapchainKHR( m_hDevice, m_hSwapChain, &AllocationCallbacks );
 	}
 
 	InitSwapChain();
@@ -1267,25 +1266,25 @@ void VKContext::ShutdownBackend( void )
 
 	vmaDestroyAllocator( m_hAllocator );
 
-	vkDestroyPipeline( m_hDevice, m_hPipeline, NULL );
+	vkDestroyPipeline( m_hDevice, m_hPipeline, &AllocationCallbacks );
 	for ( uint32_t i = 0; i < VK_MAX_FRAMES_IN_FLIGHT; i++ ) {
-		vkDestroySemaphore( m_hDevice, m_hImageAvailableSemaphore[i], NULL );
-		vkDestroySemaphore( m_hDevice, m_hRenderFinishedSemaphore[i], NULL );
-		vkDestroyFence( m_hDevice, m_hInFlightFences[i], NULL );
+		vkDestroySemaphore( m_hDevice, m_hImageAvailableSemaphore[i], &AllocationCallbacks );
+		vkDestroySemaphore( m_hDevice, m_hRenderFinishedSemaphore[i], &AllocationCallbacks );
+		vkDestroyFence( m_hDevice, m_hInFlightFences[i], &AllocationCallbacks );
 	}
-	vkDestroyCommandPool( m_hDevice, m_hCommandPool, NULL );
+	vkDestroyCommandPool( m_hDevice, m_hCommandPool, &AllocationCallbacks );
 	for ( auto& it : m_SwapChainFramebuffers ) {
-		vkDestroyFramebuffer( m_hDevice, it, NULL );
+		vkDestroyFramebuffer( m_hDevice, it, &AllocationCallbacks );
 	}
 	for ( auto& it : m_SwapChainImageViews ) {
-		vkDestroyImageView( m_hDevice, it, NULL );
+		vkDestroyImageView( m_hDevice, it, &AllocationCallbacks );
 	}
-	vkDestroyPipelineLayout( m_hDevice, m_hPipelineLayout, NULL );
-	vkDestroyRenderPass( m_hDevice, m_hRenderPass, NULL );
-	vkDestroySwapchainKHR( m_hDevice, m_hSwapChain, NULL );
+	vkDestroyPipelineLayout( m_hDevice, m_hPipelineLayout, &AllocationCallbacks );
+	vkDestroyRenderPass( m_hDevice, m_hRenderPass, &AllocationCallbacks );
+	vkDestroySwapchainKHR( m_hDevice, m_hSwapChain, &AllocationCallbacks );
 	vkDestroySurfaceKHR( m_hInstance, m_hSurface, NULL );
-	vkDestroyDevice( m_hDevice, NULL );
-	vkDestroyInstance( m_hInstance, NULL );
+	vkDestroyDevice( m_hDevice, &AllocationCallbacks );
+	vkDestroyInstance( m_hInstance, &AllocationCallbacks );
 
 	SDL_Vulkan_UnloadLibrary();
 }
