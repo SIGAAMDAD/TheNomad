@@ -9,7 +9,7 @@
 #include <Engine/Core/Events/EventManager.h>
 #include <Engine/Core/Input/InputManager.h>
 #if SIRENGINE_BUILD_EDITOR == 1
-#include <Editor/ValdenApplication.h>
+#include <Editor/Source/ValdenApplication.h>
 #endif
 #include <sys/stat.h>
 #include <errno.h>
@@ -42,6 +42,9 @@ PosixApplication::~PosixApplication()
 	g_bExitApp.store( true );
 
 	g_pConsoleManager->SaveConfig( "Config/config.json" );
+#if SIRENGINE_BUILD_EDITOR == 1
+	s_pEditorApplication->Shutdown();
+#endif
 	Input::g_pInputManager->Shutdown();
 	Events::g_pEventManager->Shutdown();
 	RenderLib::g_pContext->Shutdown();
@@ -50,6 +53,8 @@ PosixApplication::~PosixApplication()
 	g_pFileSystem->Shutdown();
 
 	g_pApplication = NULL;
+
+	_Exit( EXIT_SUCCESS );
 }
 
 void PosixApplication::Run( void )
@@ -57,7 +62,7 @@ void PosixApplication::Run( void )
 	while ( !g_bExitApp.load() ) {
 		Events::g_pEventManager->Frame( 0 );
 		if ( g_bExitApp.load() ) {
-			continue;
+			break;
 		}
 		Input::g_pInputManager->Frame( 0 );
 
@@ -289,9 +294,6 @@ int main( int argc, char **argv )
 
 	g_pApplication->Init();
 	g_pApplication->Run();
-	if ( g_pApplication ) {
-		delete g_pApplication;
-	}
 
 	_Exit( EXIT_SUCCESS );
 

@@ -6,6 +6,8 @@
 #endif
 
 #include <Engine/Core/FileSystem/FileList.h>
+#include "DirectoryView.h"
+#include "FileView.h"
 
 using namespace SIREngine;
 
@@ -18,6 +20,8 @@ public:
 	~CFileTree();
 
 	void Draw( void );
+private:
+	eastl::unordered_map<CFilePath, IContentView> m_DirectoryList;
 };
 
 };

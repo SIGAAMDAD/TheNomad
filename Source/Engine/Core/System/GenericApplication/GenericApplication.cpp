@@ -27,7 +27,7 @@ IGenericApplication::~IGenericApplication()
 
 void IGenericApplication::QuitGame( const Events::IEventBase *pEventData )
 {
-	assert( pEventData->GetType() == Events::EventType_Quit );
+//	assert( pEventData->GetType() == Events::EventType_Quit );
 	delete g_pApplication;
 }
 

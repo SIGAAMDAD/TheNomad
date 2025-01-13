@@ -42,9 +42,27 @@ void CApplication::Shutdown( void )
 
 void CApplication::Frame( uint32_t nFrameTic )
 {
+	if ( !System::g_pApplication ) {
+		return;
+	}
+
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplSDL2_NewFrame();
 	ImGui::NewFrame();
+
+	if ( ImGui::BeginMainMenuBar() ) {
+		if ( ImGui::BeginMenu( "FILE" ) ) {
+			if ( ImGui::MenuItem( "EXIT" ) ) {
+				System::g_pApplication->QuitGame( NULL );
+				return;
+			}
+			ImGui::EndMenu();
+		}
+		if ( ImGui::BeginMenu( "EDIT" ) ) {
+			ImGui::EndMenu();
+		}
+		ImGui::EndMainMenuBar();
+	}
 
 	ImGui::ShowDebugLogWindow();
 
