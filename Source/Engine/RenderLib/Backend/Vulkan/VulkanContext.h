@@ -21,6 +21,8 @@ public:
 	VkDevice GetDevice( void );
 	VkPhysicalDevice GetPhysicalDevice( void );
 	VkSurfaceKHR GetSurface( void );
+	VmaAllocator GetAllocator( void );
+	VkCommandBuffer GetCommandBuffer( void );
 
 	static VkAllocationCallbacks AllocationCallbacks;
 private:
@@ -74,6 +76,16 @@ private:
 };
 
 extern VKContext *g_pVKContext;
+
+SIRENGINE_FORCEINLINE VmaAllocator VKContext::GetAllocator( void )
+{
+	return m_hAllocator;
+}
+
+SIRENGINE_FORCEINLINE VkCommandBuffer VKContext::GetCommandBuffer( void )
+{
+	return m_hCommandBuffers[ m_nCurrentFrame ];
+}
 
 SIRENGINE_FORCEINLINE VkDevice VKContext::GetDevice( void )
 {

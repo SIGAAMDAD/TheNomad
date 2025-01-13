@@ -4,6 +4,7 @@
 #include <vk_mem_alloc.h>
 #include <Engine/Core/Util.h>
 #include "VulkanShader.h"
+#include "VulkanBuffer.h"
 #include <nvsdk_ngx.h>
 #include <nvsdk_ngx_vk.h>
 #include <nvsdk_ngx_helpers_vk.h>
@@ -116,6 +117,8 @@ namespace SIREngine::RenderLib::Vulkan {
 
 SIRENGINE_DEFINE_LOG_CATEGORY( VulkanBackend, ELogLevel::Info );
 
+static VKBuffer s_VertexBuffer;
+static VKBuffer s_IndexBuffer;
 
 typedef struct {
 	VkSurfaceCapabilitiesKHR capabilities;
@@ -376,7 +379,7 @@ bool VKContext::CreateWindow( void )
 
 	SDL_Vulkan_LoadLibrary( NULL );
 
-	if ( !( nBorderMode % 2 ) ) {
+	if ( nBorderMode % 2 ) {
 		// its borderless
 		SIRENGINE_LOG_LEVEL( RenderBackend, ELogLevel::Info, "Creating borderless window." );
 		flags |= SDL_WINDOW_BORDERLESS;
@@ -931,13 +934,53 @@ void VKContext::CreateFixedFunctionPipeline( void )
 		fragmentInfo
 	};
 
+	// setup drawVert_t
+	VkVertexInputBindingDescription inputDescription;
+	memset( &inputDescription, 0, sizeof( inputDescription ) );
+	inputDescription.binding = 0;
+	inputDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+	inputDescription.stride = sizeof( DrawVert_t );
+
+	VkVertexInputAttributeDescription szAttribDescriptions[4];
+	memset( szAttribDescriptions, 0, sizeof( szAttribDescriptions ) );
+
+	const DrawVert_t verts[] = {
+		{ { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f }, {  0.0f, -0.5f }, { 0.0f, 0.0f } },
+		{ { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f }, {  0.5f,  0.5f }, { 0.0f, 0.0f } },
+		{ { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f }, { -0.5f,  0.5f }, { 0.0f, 0.0f } }
+	};
+
+	{
+		szAttribDescriptions[0].binding = 0;
+		szAttribDescriptions[0].offset = SIREngine_offsetof( DrawVert_t, Position );
+		szAttribDescriptions[0].location = 0;
+		szAttribDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
+
+		szAttribDescriptions[1].binding = 0;
+		szAttribDescriptions[1].offset = SIREngine_offsetof( DrawVert_t, TexCoords );
+		szAttribDescriptions[1].location = 1;
+		szAttribDescriptions[1].format = VK_FORMAT_R32G32_SFLOAT;
+
+		szAttribDescriptions[2].binding = 0;
+		szAttribDescriptions[2].offset = SIREngine_offsetof( DrawVert_t, WorldPos );
+		szAttribDescriptions[2].location = 2;
+		szAttribDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
+
+		szAttribDescriptions[3].binding = 0;
+		szAttribDescriptions[3].offset = SIREngine_offsetof( DrawVert_t, Color );
+		szAttribDescriptions[3].location = 3;
+		szAttribDescriptions[3].format = VK_FORMAT_R32G32B32A32_SFLOAT;
+	}
+
+	s_VertexBuffer.Allocate( verts, sizeof( verts ), EBufferType::Vertex );
+
 	VkPipelineVertexInputStateCreateInfo vertexInputInfo;
 	memset( &vertexInputInfo, 0, sizeof( vertexInputInfo ) );
 	vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-	vertexInputInfo.vertexBindingDescriptionCount = 0;
-	vertexInputInfo.pVertexBindingDescriptions = NULL; // optional
-	vertexInputInfo.vertexAttributeDescriptionCount = 0;
-	vertexInputInfo.pVertexAttributeDescriptions = NULL; // optional
+	vertexInputInfo.vertexBindingDescriptionCount = 1;
+	vertexInputInfo.pVertexBindingDescriptions = &inputDescription;
+	vertexInputInfo.vertexAttributeDescriptionCount = SIREngine_StaticArrayLength( szAttribDescriptions );
+	vertexInputInfo.pVertexAttributeDescriptions = szAttribDescriptions;
 
 	VkPipelineInputAssemblyStateCreateInfo inputAssembly;
 	memset( &inputAssembly, 0, sizeof( inputAssembly ) );
@@ -1110,10 +1153,6 @@ void VKContext::BeginFrame( void )
 
 void VKContext::EndFrame( void )
 {
-	if ( System::g_bExitApp.load() ) {
-		return;
-	}
-
 	VkSubmitInfo submitInfo;
 	memset( &submitInfo, 0, sizeof( submitInfo ) );
 	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -1190,6 +1229,8 @@ void VKContext::RecordCommandBuffer( VkCommandBuffer hCommandBuffer, uint32_t nI
 	scissor.extent = m_nSwapChainExtent;
 	vkCmdSetScissor( hCommandBuffer, 0, 1, &scissor );
 
+	s_VertexBuffer.Bind();
+
 	vkCmdDraw( hCommandBuffer, 3, 1, 0, 0 );
 
 	vkCmdEndRenderPass( hCommandBuffer );
@@ -1199,6 +1240,8 @@ void VKContext::RecordCommandBuffer( VkCommandBuffer hCommandBuffer, uint32_t nI
 
 void VKContext::RecreateSwapChain( void )
 {
+	SIRENGINE_LOG_LEVEL( VulkanBackend, ELogLevel::Developer, "Recreating swapchain..." );
+
 	vkDeviceWaitIdle( m_hDevice );
 
 	// cleanup first
@@ -1218,6 +1261,11 @@ void VKContext::RecreateSwapChain( void )
 void VKContext::ShutdownBackend( void )
 {
 	vkDeviceWaitIdle( m_hDevice );
+
+	s_VertexBuffer.Release();
+	s_IndexBuffer.Release();
+
+	vmaDestroyAllocator( m_hAllocator );
 
 	vkDestroyPipeline( m_hDevice, m_hPipeline, NULL );
 	for ( uint32_t i = 0; i < VK_MAX_FRAMES_IN_FLIGHT; i++ ) {

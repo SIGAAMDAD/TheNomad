@@ -450,6 +450,13 @@ void CConsoleManager::LoadConfig( const CFilePath& filePath )
 
 		SIRENGINE_LOG_LEVEL( ConsoleSystem, ELogLevel::Info, "Loading cvar value \"%s\" from section \"%s\"...", pCvar->GetName().c_str(),
 			pSectionName  );
+		
+		if ( !configLoader.contains( pSectionName ) ) {
+			continue;
+		}
+		if ( !configLoader[ pSectionName ].contains( pCvar->GetName() ) ) {
+			continue;
+		}
 
 		switch ( pCvar->GetType() ) {
 		case CvarType_Bool:
@@ -494,18 +501,38 @@ void CConsoleManager::SaveConfig( const CFilePath& filePath ) const
 		SIRENGINE_LOG( "\"%s\" = \"%s\"", pCvar->GetName().c_str(), pCvar->GetStringValue().c_str() );
 
 		switch ( pCvar->GetType() ) {
-		case CvarType_Bool:
-			data[ GetConfigSectionName( pCvar->GetGroup() ) ][ pCvar->GetName() ] = dynamic_cast<CVar<bool> *>( pCvar )->GetValue();
-			break;
-		case CvarType_Int:
-			data[ GetConfigSectionName( pCvar->GetGroup() ) ][ pCvar->GetName() ] = dynamic_cast<CVar<int32_t> *>( pCvar )->GetValue();
-			break;
-		case CvarType_UInt:
-			data[ GetConfigSectionName( pCvar->GetGroup() ) ][ pCvar->GetName() ] = dynamic_cast<CVar<uint32_t> *>( pCvar )->GetValue();
-			break;
-		case CvarType_Float:
-			data[ GetConfigSectionName( pCvar->GetGroup() ) ][ pCvar->GetName() ] = dynamic_cast<CVar<float> *>( pCvar )->GetValue();
-			break;
+		case CvarType_Bool: {
+			const CVar<bool> *pValue = dynamic_cast<CVar<bool> *>( pCvar );
+			if ( pValue ) {
+				data[ GetConfigSectionName( pCvar->GetGroup() ) ][ pCvar->GetName() ] = pValue->GetValue();
+			} else {
+				data[ GetConfigSectionName( pCvar->GetGroup() ) ][ pCvar->GetName() ] = dynamic_cast<CVarRef<bool> *>( pCvar )->GetValue();
+			}
+			break; }
+		case CvarType_Int: {
+			const CVar<int32_t> *pValue = dynamic_cast<CVar<int32_t> *>( pCvar );
+			if ( pValue ) {
+				data[ GetConfigSectionName( pCvar->GetGroup() ) ][ pCvar->GetName() ] = pValue->GetValue();
+			} else {
+				data[ GetConfigSectionName( pCvar->GetGroup() ) ][ pCvar->GetName() ] = dynamic_cast<CVarRef<int32_t> *>( pCvar )->GetValue();
+			}
+			break; }
+		case CvarType_UInt: {
+			const CVar<uint32_t> *pValue = dynamic_cast<CVar<uint32_t> *>( pCvar );
+			if ( pValue ) {
+				data[ GetConfigSectionName( pCvar->GetGroup() ) ][ pCvar->GetName() ] = pValue->GetValue();
+			} else {
+				data[ GetConfigSectionName( pCvar->GetGroup() ) ][ pCvar->GetName() ] = dynamic_cast<CVarRef<uint32_t> *>( pCvar )->GetValue();
+			}
+			break; }
+		case CvarType_Float: {
+			const CVar<float> *pValue = dynamic_cast<CVar<float> *>( pCvar );
+			if ( pValue ) {
+				data[ GetConfigSectionName( pCvar->GetGroup() ) ][ pCvar->GetName() ] = pValue->GetValue();
+			} else {
+				data[ GetConfigSectionName( pCvar->GetGroup() ) ][ pCvar->GetName() ] = dynamic_cast<CVarRef<float> *>( pCvar )->GetValue();
+			}
+			break; }
 		case CvarType_FilePath:
 		case CvarType_String:
 			data[ GetConfigSectionName( pCvar->GetGroup() ) ][ pCvar->GetName() ] = pCvar->GetStringValue();

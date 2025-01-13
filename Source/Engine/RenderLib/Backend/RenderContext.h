@@ -8,8 +8,7 @@
 #include <Engine/Core/Core.h>
 #include <Engine/Core/EngineSystem.h>
 #include <Engine/Core/ConsoleManager.h>
-
-#include <SDL2/SDL.h>
+#include "RenderCommon.h"
 
 namespace SIREngine::RenderLib {
 
@@ -21,6 +20,17 @@ typedef struct ContextInfo_s {
 	uint32_t nWindowPositionX;
 	uint32_t nWindowPositionY;
 } ContextInfo_t;
+
+enum class EBufferType : uint32_t
+{
+	Vertex,
+	Index,
+	ShaderStorage,
+	Uniform,
+	Texture,
+
+	Count
+};
 
 enum class ERenderAPI : uint32_t
 {

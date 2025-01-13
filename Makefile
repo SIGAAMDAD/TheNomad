@@ -416,6 +416,54 @@ Source/Engine/Core/FileSystem/FileWriter.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/Core/FileSystem/FileWriter.cpp.s
 .PHONY : Source/Engine/Core/FileSystem/FileWriter.cpp.s
 
+Source/Engine/Core/Input/BindingManager.o: Source/Engine/Core/Input/BindingManager.cpp.o
+.PHONY : Source/Engine/Core/Input/BindingManager.o
+
+# target to build an object file
+Source/Engine/Core/Input/BindingManager.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/Core/Input/BindingManager.cpp.o
+.PHONY : Source/Engine/Core/Input/BindingManager.cpp.o
+
+Source/Engine/Core/Input/BindingManager.i: Source/Engine/Core/Input/BindingManager.cpp.i
+.PHONY : Source/Engine/Core/Input/BindingManager.i
+
+# target to preprocess a source file
+Source/Engine/Core/Input/BindingManager.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/Core/Input/BindingManager.cpp.i
+.PHONY : Source/Engine/Core/Input/BindingManager.cpp.i
+
+Source/Engine/Core/Input/BindingManager.s: Source/Engine/Core/Input/BindingManager.cpp.s
+.PHONY : Source/Engine/Core/Input/BindingManager.s
+
+# target to generate assembly for a file
+Source/Engine/Core/Input/BindingManager.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/Core/Input/BindingManager.cpp.s
+.PHONY : Source/Engine/Core/Input/BindingManager.cpp.s
+
+Source/Engine/Core/Input/InputManager.o: Source/Engine/Core/Input/InputManager.cpp.o
+.PHONY : Source/Engine/Core/Input/InputManager.o
+
+# target to build an object file
+Source/Engine/Core/Input/InputManager.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/Core/Input/InputManager.cpp.o
+.PHONY : Source/Engine/Core/Input/InputManager.cpp.o
+
+Source/Engine/Core/Input/InputManager.i: Source/Engine/Core/Input/InputManager.cpp.i
+.PHONY : Source/Engine/Core/Input/InputManager.i
+
+# target to preprocess a source file
+Source/Engine/Core/Input/InputManager.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/Core/Input/InputManager.cpp.i
+.PHONY : Source/Engine/Core/Input/InputManager.cpp.i
+
+Source/Engine/Core/Input/InputManager.s: Source/Engine/Core/Input/InputManager.cpp.s
+.PHONY : Source/Engine/Core/Input/InputManager.s
+
+# target to generate assembly for a file
+Source/Engine/Core/Input/InputManager.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/Core/Input/InputManager.cpp.s
+.PHONY : Source/Engine/Core/Input/InputManager.cpp.s
+
 Source/Engine/Core/Logging/Logger.o: Source/Engine/Core/Logging/Logger.cpp.o
 .PHONY : Source/Engine/Core/Logging/Logger.o
 
@@ -656,6 +704,30 @@ Source/Engine/RenderLib/Backend/RenderContext.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/RenderLib/Backend/RenderContext.cpp.s
 .PHONY : Source/Engine/RenderLib/Backend/RenderContext.cpp.s
 
+Source/Engine/RenderLib/Backend/Vulkan/VulkanBuffer.o: Source/Engine/RenderLib/Backend/Vulkan/VulkanBuffer.cpp.o
+.PHONY : Source/Engine/RenderLib/Backend/Vulkan/VulkanBuffer.o
+
+# target to build an object file
+Source/Engine/RenderLib/Backend/Vulkan/VulkanBuffer.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/RenderLib/Backend/Vulkan/VulkanBuffer.cpp.o
+.PHONY : Source/Engine/RenderLib/Backend/Vulkan/VulkanBuffer.cpp.o
+
+Source/Engine/RenderLib/Backend/Vulkan/VulkanBuffer.i: Source/Engine/RenderLib/Backend/Vulkan/VulkanBuffer.cpp.i
+.PHONY : Source/Engine/RenderLib/Backend/Vulkan/VulkanBuffer.i
+
+# target to preprocess a source file
+Source/Engine/RenderLib/Backend/Vulkan/VulkanBuffer.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/RenderLib/Backend/Vulkan/VulkanBuffer.cpp.i
+.PHONY : Source/Engine/RenderLib/Backend/Vulkan/VulkanBuffer.cpp.i
+
+Source/Engine/RenderLib/Backend/Vulkan/VulkanBuffer.s: Source/Engine/RenderLib/Backend/Vulkan/VulkanBuffer.cpp.s
+.PHONY : Source/Engine/RenderLib/Backend/Vulkan/VulkanBuffer.s
+
+# target to generate assembly for a file
+Source/Engine/RenderLib/Backend/Vulkan/VulkanBuffer.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/RenderLib/Backend/Vulkan/VulkanBuffer.cpp.s
+.PHONY : Source/Engine/RenderLib/Backend/Vulkan/VulkanBuffer.cpp.s
+
 Source/Engine/RenderLib/Backend/Vulkan/VulkanContext.o: Source/Engine/RenderLib/Backend/Vulkan/VulkanContext.cpp.o
 .PHONY : Source/Engine/RenderLib/Backend/Vulkan/VulkanContext.o
 
@@ -761,6 +833,12 @@ help:
 	@echo "... Source/Engine/Core/FileSystem/FileWriter.o"
 	@echo "... Source/Engine/Core/FileSystem/FileWriter.i"
 	@echo "... Source/Engine/Core/FileSystem/FileWriter.s"
+	@echo "... Source/Engine/Core/Input/BindingManager.o"
+	@echo "... Source/Engine/Core/Input/BindingManager.i"
+	@echo "... Source/Engine/Core/Input/BindingManager.s"
+	@echo "... Source/Engine/Core/Input/InputManager.o"
+	@echo "... Source/Engine/Core/Input/InputManager.i"
+	@echo "... Source/Engine/Core/Input/InputManager.s"
 	@echo "... Source/Engine/Core/Logging/Logger.o"
 	@echo "... Source/Engine/Core/Logging/Logger.i"
 	@echo "... Source/Engine/Core/Logging/Logger.s"
@@ -791,6 +869,9 @@ help:
 	@echo "... Source/Engine/RenderLib/Backend/RenderContext.o"
 	@echo "... Source/Engine/RenderLib/Backend/RenderContext.i"
 	@echo "... Source/Engine/RenderLib/Backend/RenderContext.s"
+	@echo "... Source/Engine/RenderLib/Backend/Vulkan/VulkanBuffer.o"
+	@echo "... Source/Engine/RenderLib/Backend/Vulkan/VulkanBuffer.i"
+	@echo "... Source/Engine/RenderLib/Backend/Vulkan/VulkanBuffer.s"
 	@echo "... Source/Engine/RenderLib/Backend/Vulkan/VulkanContext.o"
 	@echo "... Source/Engine/RenderLib/Backend/Vulkan/VulkanContext.i"
 	@echo "... Source/Engine/RenderLib/Backend/Vulkan/VulkanContext.s"

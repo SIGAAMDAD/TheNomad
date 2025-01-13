@@ -7,6 +7,7 @@
 #include <Engine/Core/ConsoleManager.h>
 #include <Engine/RenderLib/Backend/RenderContext.h>
 #include <Engine/Core/Events/EventManager.h>
+#include <Engine/Core/Input/InputManager.h>
 #include <sys/stat.h>
 #include <errno.h>
 #include <libgen.h>
@@ -32,12 +33,16 @@ PosixApplication::PosixApplication( void )
 PosixApplication::~PosixApplication()
 {
 	g_bExitApp.store( true );
+
 	g_pConsoleManager->SaveConfig( "Config/config.json" );
+	Input::g_pInputManager->Shutdown();
 	Events::g_pEventManager->Shutdown();
 	RenderLib::g_pContext->Shutdown();
 	delete RenderLib::g_pContext;
 	CLogManager::ShutdownLogger();
 	g_pFileSystem->Shutdown();
+
+	g_pApplication = NULL;
 }
 
 void PosixApplication::Run( void )
@@ -47,6 +52,7 @@ void PosixApplication::Run( void )
 		if ( g_bExitApp.load() ) {
 			continue;
 		}
+		Input::g_pInputManager->Frame( 0 );
 
 		RenderLib::g_pContext->BeginFrame();
 
@@ -124,10 +130,13 @@ void PosixApplication::Init( void )
 	static Events::CEventManager eventManager;
 	Events::g_pEventManager = &eventManager;
 
+	static Input::CInputManager inputManager;
+	Input::g_pInputManager = &inputManager;
+
 	RenderLib::ContextInfo_t contextInfo;
 	contextInfo.pszWindowName = "TheNomad v1.2.0";
-	contextInfo.nWindowPositionX = 0;
-	contextInfo.nWindowPositionY = 0;
+	contextInfo.nWindowPositionX = SDL_WINDOWPOS_CENTERED;
+	contextInfo.nWindowPositionY = SDL_WINDOWPOS_CENTERED;
 	contextInfo.nWindowWidth = 1280;
 	contextInfo.nWindowHeight = 720;
 	contextInfo.nAppVersion = SIRENGINE_MAKE_VERSION( 1, 2, 0 );
@@ -145,6 +154,7 @@ void PosixApplication::Init( void )
 
 	RenderLib::g_pContext->RegisterCvars();
 	Events::g_pEventManager->RegisterCvars();
+	Input::g_pInputManager->RegisterCvars();
 
 	// now load the configuration to overwrite any cvars
 	g_pConsoleManager->LoadConfig( "config.json" );
@@ -152,13 +162,14 @@ void PosixApplication::Init( void )
 	// initialize the rest of the engine
 	RenderLib::g_pContext->Init();
 	Events::g_pEventManager->Init();
+	Input::g_pInputManager->Init();
 
 	Events::g_pEventManager->AddEventListener( eastl::make_shared<Events::CEventListener>(
 		"ApplicationListener", Events::EventType_Quit, IGenericApplication::QuitGame
 	) );
 
-	SIRENGINE_LOG( "SIREngine MetaData:" );
-	SIRENGINE_LOG( "  Engine Version: " SIRENGINE_VERSION_STRING );
+	SIRENGINE_LOG_LEVEL( System, ELogLevel::Info, "SIREngine MetaData:" );
+	SIRENGINE_LOG_LEVEL( System, ELogLevel::Info, "  Engine Version: " SIRENGINE_VERSION_STRING );
 }
 
 bool CreateDirectory( const char *pDirectory )
@@ -247,7 +258,9 @@ int main( int argc, char **argv )
 
 	g_pApplication->Init();
 	g_pApplication->Run();
-	delete g_pApplication;
+	if ( g_pApplication ) {
+		delete g_pApplication;
+	}
 
 	_Exit( EXIT_SUCCESS );
 

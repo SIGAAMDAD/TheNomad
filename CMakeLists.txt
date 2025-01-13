@@ -37,8 +37,14 @@ set(SOURCE_FILES
 	Source/Engine/RenderLib/Backend/Vulkan/VulkanCommon.h
 	Source/Engine/RenderLib/Backend/Vulkan/VulkanShader.h
 	Source/Engine/RenderLib/Backend/Vulkan/VulkanShader.cpp
+	Source/Engine/RenderLib/Backend/Vulkan/VulkanBuffer.h
+	Source/Engine/RenderLib/Backend/Vulkan/VulkanBuffer.cpp
 	Source/Engine/RenderLib/Backend/Vulkan/VulkanContext.h
 	Source/Engine/RenderLib/Backend/Vulkan/VulkanContext.cpp
+	Source/Engine/Core/Input/InputManager.cpp
+	Source/Engine/Core/Input/InputManager.h
+	Source/Engine/Core/Input/BindingManager.cpp
+	Source/Engine/Core/Input/BindingManager.h
 	Source/Engine/Core/Events/ControllerStatusEvent.h
 	Source/Engine/Core/Events/EventBase.h
 	Source/Engine/Core/Events/EventData.h
