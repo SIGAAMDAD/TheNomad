@@ -540,10 +540,10 @@ VkPresentModeKHR ChooseSwapPresentMode( const VkPresentModeKHR *pAvailablePresen
 
 	switch ( vid_VSync.GetValue() ) {
 	case -1:
-		desiredPresentMode = VK_PRESENT_MODE_FIFO_RELAXED_KHR;
+		desiredPresentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
 		break;
 	case 0:
-		desiredPresentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
+		desiredPresentMode = VK_PRESENT_MODE_MAILBOX_KHR;
 		break;
 	case 1:
 		desiredPresentMode = VK_PRESENT_MODE_FIFO_KHR;

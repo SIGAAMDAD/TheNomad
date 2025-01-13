@@ -104,8 +104,12 @@ public:
 	virtual void BeginFrame( void ) = 0;
 	virtual void EndFrame( void ) = 0;
 
+	SDL_Window *GetWindow( void );
+
 	static IRenderContext *CreateContext( const ContextInfo_t& contextInfo );
 protected:
+	friend void RegisterCvars( void );
+
 	virtual bool CreateWindow( void ) = 0;
 	virtual void ShutdownBackend( void ) = 0;
 	virtual void RegisterBackendCvars( void ) = 0;
@@ -113,6 +117,13 @@ protected:
 	SDL_Window *m_pWindow;
 	ContextInfo_t m_ContextData;
 };
+
+extern void RegisterCvars( void );
+
+SIRENGINE_FORCEINLINE SDL_Window *IRenderContext::GetWindow( void )
+{
+	return m_pWindow;
+}
 
 extern IRenderContext *g_pContext;
 

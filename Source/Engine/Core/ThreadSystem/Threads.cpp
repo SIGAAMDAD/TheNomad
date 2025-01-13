@@ -5,6 +5,29 @@ namespace SIREngine {
 
 SIRENGINE_DEFINE_LOG_CATEGORY( ThreadSystem, ELogLevel::Info );
 
+CThreadCondVar::CThreadCondVar( void )
+{
+	m_pCondVar = SDL_CreateCond();
+	if ( !m_pCondVar ) {
+		SIRENGINE_LOG_LEVEL( ThreadSystem, ELogLevel::Fatal, "Error creating SDL2 condvar: %s", SDL_GetError() );
+	}
+}
+
+CThreadCondVar::~CThreadCondVar()
+{
+	if ( m_pCondVar ) {
+		SDL_DestroyCond( m_pCondVar );
+	}
+	m_pCondVar = NULL;
+}
+
+void CThreadCondVar::ErrorCheck( const char *pFunction, int nErrorCode )
+{
+	if ( nErrorCode == -1 ) {
+		SIRENGINE_LOG_LEVEL( ThreadSystem, ELogLevel::Fatal, "%s failed: %s", pFunction, SDL_GetError() );
+	}
+}
+
 CThreadMutex::CThreadMutex( void )
 {
 	m_pMutex = SDL_CreateMutex();

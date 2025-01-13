@@ -680,6 +680,54 @@ Source/Engine/Core/Util.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/Core/Util.cpp.s
 .PHONY : Source/Engine/Core/Util.cpp.s
 
+Source/Engine/RenderLib/Backend/OpenGL/OpenGLContext.o: Source/Engine/RenderLib/Backend/OpenGL/OpenGLContext.cpp.o
+.PHONY : Source/Engine/RenderLib/Backend/OpenGL/OpenGLContext.o
+
+# target to build an object file
+Source/Engine/RenderLib/Backend/OpenGL/OpenGLContext.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/RenderLib/Backend/OpenGL/OpenGLContext.cpp.o
+.PHONY : Source/Engine/RenderLib/Backend/OpenGL/OpenGLContext.cpp.o
+
+Source/Engine/RenderLib/Backend/OpenGL/OpenGLContext.i: Source/Engine/RenderLib/Backend/OpenGL/OpenGLContext.cpp.i
+.PHONY : Source/Engine/RenderLib/Backend/OpenGL/OpenGLContext.i
+
+# target to preprocess a source file
+Source/Engine/RenderLib/Backend/OpenGL/OpenGLContext.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/RenderLib/Backend/OpenGL/OpenGLContext.cpp.i
+.PHONY : Source/Engine/RenderLib/Backend/OpenGL/OpenGLContext.cpp.i
+
+Source/Engine/RenderLib/Backend/OpenGL/OpenGLContext.s: Source/Engine/RenderLib/Backend/OpenGL/OpenGLContext.cpp.s
+.PHONY : Source/Engine/RenderLib/Backend/OpenGL/OpenGLContext.s
+
+# target to generate assembly for a file
+Source/Engine/RenderLib/Backend/OpenGL/OpenGLContext.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/RenderLib/Backend/OpenGL/OpenGLContext.cpp.s
+.PHONY : Source/Engine/RenderLib/Backend/OpenGL/OpenGLContext.cpp.s
+
+Source/Engine/RenderLib/Backend/OpenGL/OpenGLProcs.o: Source/Engine/RenderLib/Backend/OpenGL/OpenGLProcs.cpp.o
+.PHONY : Source/Engine/RenderLib/Backend/OpenGL/OpenGLProcs.o
+
+# target to build an object file
+Source/Engine/RenderLib/Backend/OpenGL/OpenGLProcs.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/RenderLib/Backend/OpenGL/OpenGLProcs.cpp.o
+.PHONY : Source/Engine/RenderLib/Backend/OpenGL/OpenGLProcs.cpp.o
+
+Source/Engine/RenderLib/Backend/OpenGL/OpenGLProcs.i: Source/Engine/RenderLib/Backend/OpenGL/OpenGLProcs.cpp.i
+.PHONY : Source/Engine/RenderLib/Backend/OpenGL/OpenGLProcs.i
+
+# target to preprocess a source file
+Source/Engine/RenderLib/Backend/OpenGL/OpenGLProcs.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/RenderLib/Backend/OpenGL/OpenGLProcs.cpp.i
+.PHONY : Source/Engine/RenderLib/Backend/OpenGL/OpenGLProcs.cpp.i
+
+Source/Engine/RenderLib/Backend/OpenGL/OpenGLProcs.s: Source/Engine/RenderLib/Backend/OpenGL/OpenGLProcs.cpp.s
+.PHONY : Source/Engine/RenderLib/Backend/OpenGL/OpenGLProcs.s
+
+# target to generate assembly for a file
+Source/Engine/RenderLib/Backend/OpenGL/OpenGLProcs.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TheNomad.x64.dir/build.make CMakeFiles/TheNomad.x64.dir/Source/Engine/RenderLib/Backend/OpenGL/OpenGLProcs.cpp.s
+.PHONY : Source/Engine/RenderLib/Backend/OpenGL/OpenGLProcs.cpp.s
+
 Source/Engine/RenderLib/Backend/RenderContext.o: Source/Engine/RenderLib/Backend/RenderContext.cpp.o
 .PHONY : Source/Engine/RenderLib/Backend/RenderContext.o
 
@@ -866,6 +914,12 @@ help:
 	@echo "... Source/Engine/Core/Util.o"
 	@echo "... Source/Engine/Core/Util.i"
 	@echo "... Source/Engine/Core/Util.s"
+	@echo "... Source/Engine/RenderLib/Backend/OpenGL/OpenGLContext.o"
+	@echo "... Source/Engine/RenderLib/Backend/OpenGL/OpenGLContext.i"
+	@echo "... Source/Engine/RenderLib/Backend/OpenGL/OpenGLContext.s"
+	@echo "... Source/Engine/RenderLib/Backend/OpenGL/OpenGLProcs.o"
+	@echo "... Source/Engine/RenderLib/Backend/OpenGL/OpenGLProcs.i"
+	@echo "... Source/Engine/RenderLib/Backend/OpenGL/OpenGLProcs.s"
 	@echo "... Source/Engine/RenderLib/Backend/RenderContext.o"
 	@echo "... Source/Engine/RenderLib/Backend/RenderContext.i"
 	@echo "... Source/Engine/RenderLib/Backend/RenderContext.s"

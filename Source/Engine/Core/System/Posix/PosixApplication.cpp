@@ -8,6 +8,9 @@
 #include <Engine/RenderLib/Backend/RenderContext.h>
 #include <Engine/Core/Events/EventManager.h>
 #include <Engine/Core/Input/InputManager.h>
+#if SIRENGINE_BUILD_EDITOR == 1
+#include <Editor/ValdenApplication.h>
+#endif
 #include <sys/stat.h>
 #include <errno.h>
 #include <libgen.h>
@@ -20,6 +23,10 @@ static CFilePath CurrentPath;
 static eastl::vector<CString> CommandLine;
 int myargc;
 char **myargv;
+
+#if SIRENGINE_BUILD_EDITOR == 1
+static Valden::CApplication *s_pEditorApplication;
+#endif
 
 SIRENGINE_DEFINE_LOG_CATEGORY( System, ELogLevel::Info );
 
@@ -55,6 +62,10 @@ void PosixApplication::Run( void )
 		Input::g_pInputManager->Frame( 0 );
 
 		RenderLib::g_pContext->BeginFrame();
+
+	#if SIRENGINE_BUILD_EDITOR == 1
+		s_pEditorApplication->Frame( 0 );
+	#endif
 
 		RenderLib::g_pContext->EndFrame();
 	}
@@ -134,13 +145,20 @@ void PosixApplication::Init( void )
 	Input::g_pInputManager = &inputManager;
 
 	RenderLib::ContextInfo_t contextInfo;
+#if SIRENGINE_BUILD_EDITOR == 1
+	contextInfo.pszWindowName = "Valden";
+#else
 	contextInfo.pszWindowName = "TheNomad v1.2.0";
+#endif
 	contextInfo.nWindowPositionX = SDL_WINDOWPOS_CENTERED;
 	contextInfo.nWindowPositionY = SDL_WINDOWPOS_CENTERED;
 	contextInfo.nWindowWidth = 1280;
 	contextInfo.nWindowHeight = 720;
+#if SIRENGINE_BUILD_EDITOR == 1
+	contextInfo.nAppVersion = SIRENGINE_MAKE_VERSION( 2, 0, 0 );
+#else
 	contextInfo.nAppVersion = SIRENGINE_MAKE_VERSION( 1, 2, 0 );
-	RenderLib::g_pContext = RenderLib::IRenderContext::CreateContext( contextInfo );
+#endif
 
 	GetCurrentPath();
 
@@ -152,17 +170,30 @@ void PosixApplication::Init( void )
 	g_pFileSystem->Init();
 	CLogManager::LaunchLoggingThread();
 
-	RenderLib::g_pContext->RegisterCvars();
+#if SIRENGINE_BUILD_EDITOR == 1
+	static Valden::CApplication editorApplication;
+	s_pEditorApplication = &editorApplication;
+#endif
+
+	RenderLib::RegisterCvars();
 	Events::g_pEventManager->RegisterCvars();
 	Input::g_pInputManager->RegisterCvars();
+#if SIRENGINE_BUILD_EDITOR == 1
+	editorApplication.RegisterCvars();
+#endif
 
 	// now load the configuration to overwrite any cvars
 	g_pConsoleManager->LoadConfig( "config.json" );
+
+	RenderLib::g_pContext = RenderLib::IRenderContext::CreateContext( contextInfo );
 
 	// initialize the rest of the engine
 	RenderLib::g_pContext->Init();
 	Events::g_pEventManager->Init();
 	Input::g_pInputManager->Init();
+#if SIRENGINE_BUILD_EDITOR == 1
+	editorApplication.Init();
+#endif
 
 	Events::g_pEventManager->AddEventListener( eastl::make_shared<Events::CEventListener>(
 		"ApplicationListener", Events::EventType_Quit, IGenericApplication::QuitGame

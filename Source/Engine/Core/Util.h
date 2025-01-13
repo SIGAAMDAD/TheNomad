@@ -25,6 +25,12 @@ int String_Filter( const CString& filter, const char *name );
 int String_FilterPath( const CString& filter, const CString& name );
 bool String_HasPatterns( const CString& str );
 
+
+SIRENGINE_FORCEINLINE bool SIREngine_BoolToString()
+{
+	
+}
+
 #define SIREngine_BoolToString( value ) ( ( value ) ? "true" : "false" )
 #define SIREngine_StaticArrayLength( arr ) ( sizeof( arr ) / sizeof( *arr ) )
 #define SIREngine_CreateStackObject( objType, ... ) new ( alloca( sizeof( objType ) ) ) objType( __VA_ARGS__ )

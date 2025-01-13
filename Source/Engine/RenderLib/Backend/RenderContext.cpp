@@ -1,6 +1,7 @@
 #include <Engine/Core/Util.h>
 #include "RenderContext.h"
 #include "Vulkan/VulkanContext.h"
+#include "OpenGL/OpenGLContext.h"
 
 namespace SIREngine::RenderLib {
 
@@ -58,14 +59,16 @@ IRenderContext::~IRenderContext()
 
 void IRenderContext::RegisterCvars( void )
 {
+}
+
+void RegisterCvars( void )
+{
 	vid_WindowMode.Register();
 	vid_RenderAPI.Register();
 	vid_VSync.Register();
 
 	r_AntiAliasType.Register();
 	r_AntiAliasQuality.Register();
-
-	RegisterBackendCvars();
 }
 
 void IRenderContext::Init( void )
@@ -101,7 +104,7 @@ IRenderContext *IRenderContext::CreateContext( const ContextInfo_t& contextInfo 
 {
 	switch ( ERenderAPI( vid_RenderAPI.GetValue() ) ) {
 	case ERenderAPI::OpenGL:
-		SIRENGINE_LOG_LEVEL( RenderBackend, ELogLevel::Fatal, "OpenGL API not supported yet!" );
+		return new OpenGL::GLContext( contextInfo );
 	case ERenderAPI::Vulkan:
 		return new Vulkan::VKContext( contextInfo );
 	};

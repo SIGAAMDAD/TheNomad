@@ -23,7 +23,7 @@ pkg_check_modules(SDL2 REQUIRED sdl2)
 # Include directories
 include_directories(${GTK3_INCLUDE_DIRS} ${PANGO_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS} ${FREETYPE2_INCLUDE_DIRS}
 	Source/ ThirdParty/EASTL/include/ ThirdParty/EABase/include/Common/ ThirdParty/VulkanMemoryAllocator/ ThirdParty/glm/
-	ThirdParty/json/single_include/ ThirdParty/DLSS/include/ ThirdParty/Streamline/include/)
+	ThirdParty/json/single_include/ ThirdParty/DLSS/include/ ThirdParty/Streamline/include/ ThirdParty/ ./ )
 
 # Link directories
 link_directories(${GTK3_LIBRARY_DIRS} ${PANGO_LIBRARY_DIRS} ${SDL2_LIBRARY_DIRS} ${FREETYPE2_LIBRARY_DIRS})
@@ -32,8 +32,9 @@ add_definitions(-DSIRENGINE_BUILD_TYPE=0)
 
 # Source files
 set(SOURCE_FILES
-	Source/Engine/RenderLib/Backend/RenderContext.h
-	Source/Engine/RenderLib/Backend/RenderContext.cpp
+	Source/Engine/RenderLib/Backend/OpenGL/OpenGLProcs.cpp
+	Source/Engine/RenderLib/Backend/OpenGL/OpenGLContext.h
+	Source/Engine/RenderLib/Backend/OpenGL/OpenGLContext.cpp
 	Source/Engine/RenderLib/Backend/Vulkan/VulkanCommon.h
 	Source/Engine/RenderLib/Backend/Vulkan/VulkanShader.h
 	Source/Engine/RenderLib/Backend/Vulkan/VulkanShader.cpp
@@ -41,6 +42,8 @@ set(SOURCE_FILES
 	Source/Engine/RenderLib/Backend/Vulkan/VulkanBuffer.cpp
 	Source/Engine/RenderLib/Backend/Vulkan/VulkanContext.h
 	Source/Engine/RenderLib/Backend/Vulkan/VulkanContext.cpp
+	Source/Engine/RenderLib/Backend/RenderContext.h
+	Source/Engine/RenderLib/Backend/RenderContext.cpp
 	Source/Engine/Core/Input/InputManager.cpp
 	Source/Engine/Core/Input/InputManager.h
 	Source/Engine/Core/Input/BindingManager.cpp
