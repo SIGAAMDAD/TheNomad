@@ -65,6 +65,8 @@ void GLContext::BeginFrame( void )
 {
 	SDL_GL_MakeCurrent( m_pWindow, m_pContext );
 	nglClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+	nglViewport( 0, 0, m_ContextData.nWindowWidth, m_ContextData.nWindowHeight );
+	nglScissor( 0, 0, m_ContextData.nWindowWidth, m_ContextData.nWindowHeight );
 
 	nglDisable( GL_STENCIL_TEST );
 	nglEnable( GL_DEPTH_TEST );
@@ -74,7 +76,8 @@ void GLContext::BeginFrame( void )
 
 void GLContext::EndFrame( void )
 {
-	nglFinish();
+	SDL_GL_MakeCurrent( m_pWindow, m_pContext );
+	nglFlush();
 	SDL_GL_SwapWindow( m_pWindow );
 }
 

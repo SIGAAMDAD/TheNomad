@@ -6,6 +6,7 @@
 #endif
 
 #include <Engine/Core/EngineSystem.h>
+#include "EditorLayer.h"
 
 using namespace SIREngine;
 
@@ -22,7 +23,13 @@ public:
 	virtual void Restart( void ) override;
 	virtual void Frame( uint32_t nFrameTic ) override;
 	virtual void RegisterCvars( void ) override;
+
+	SIRENGINE_FORCEINLINE void PushLayer( const eastl::shared_ptr<IEditorLayer>& layer ) {
+		m_LayerStack.emplace_back( layer );
+		layer->Init();
+	}
 private:
+	eastl::vector<eastl::shared_ptr<IEditorLayer>> m_LayerStack;
 };
 
 };

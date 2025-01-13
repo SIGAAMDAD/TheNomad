@@ -5,6 +5,8 @@
 	#pragma once
 #endif
 
+#include <Engine/Core/Compiler.h>
+
 namespace Valden {
 
 class IEditorLayer
@@ -18,7 +20,12 @@ public:
 
 	virtual void Init( void ) = 0;
 	virtual void Shutdown( void ) = 0;
-	virtual void Render( void ) = 0;
+	virtual bool Render( void ) = 0;
+
+	SIRENGINE_FORCEINLINE bool IsActive( void ) const
+	{
+		return m_bOpen;
+	}
 protected:
 	bool m_bOpen;
 };
