@@ -35,7 +35,7 @@ private:
 	FileView_t m_Data;
 };
 
-SIRENGINE_FORCEINLINE SIRENGINE_CONSTEXPR bool CFileView::IsDirectory( void ) const
+SIRENGINE_FORCEINLINE bool CFileView::IsDirectory( void ) const
 {
 	return false;
 }

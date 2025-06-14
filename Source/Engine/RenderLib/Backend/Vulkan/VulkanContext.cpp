@@ -9,6 +9,12 @@
 #include <nvsdk_ngx_vk.h>
 #include <nvsdk_ngx_helpers_vk.h>
 #include <mimalloc-1.9/mimalloc.h>
+#define SIRENGINE_BUILD_EDITOR 1
+#if SIRENGINE_BUILD_EDITOR == 1
+#include <imgui/imgui.h>
+#include <imgui/backends/imgui_impl_sdl2.h>
+#include <imgui/backends/imgui_impl_vulkan.h>
+#endif
 
 PFN_vkCreateSwapchainKHR fn_vkCreateSwapchainKHR = NULL;
 PFN_vkCmdPushDescriptorSetKHR fn_vkCmdPushDescriptorSetKHR = NULL;
@@ -489,6 +495,20 @@ bool VKContext::CreateWindow( void )
 	InitCommandBuffer();
 	InitSyncObjects();
 
+#if SIRENGINE_BUILD_EDITOR == 1
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGui_ImplSDL2_InitForVulkan( m_pWindow );
+
+	ImGui_ImplVulkan_InitInfo info;
+	memset( &info, 0, sizeof( info ) );
+	info.Device = m_hDevice;
+	info.Instance = m_hInstance;
+	info.PhysicalDevice = m_hPhysicalDevice;
+	info.RenderPass = m_hRenderPass;
+	info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
+#endif
+
 	return true;
 }
 
@@ -933,7 +953,7 @@ void VKContext::CreateFixedFunctionPipeline( void )
 		fragmentInfo
 	};
 
-	// setup drawVert_t
+	// setup DrawVert_t
 	VkVertexInputBindingDescription inputDescription;
 	memset( &inputDescription, 0, sizeof( inputDescription ) );
 	inputDescription.binding = 0;
@@ -1228,9 +1248,11 @@ void VKContext::RecordCommandBuffer( VkCommandBuffer hCommandBuffer, uint32_t nI
 	scissor.extent = m_nSwapChainExtent;
 	vkCmdSetScissor( hCommandBuffer, 0, 1, &scissor );
 
-	s_VertexBuffer.Bind();
-
-	vkCmdDraw( hCommandBuffer, 3, 1, 0, 0 );
+#if SIRENGINE_BUILD_EDITOR == 1
+	ImGui::Render();
+	ImGui::UpdatePlatformWindows();
+	ImGui_ImplVulkan_RenderDrawData( ImGui::GetDrawData(), hCommandBuffer, m_hPipeline );
+#endif
 
 	vkCmdEndRenderPass( hCommandBuffer );
 

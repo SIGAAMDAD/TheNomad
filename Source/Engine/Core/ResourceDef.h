@@ -25,6 +25,7 @@ public:
 
 	const CFilePath& GetPath( void ) const;
 protected:
+	IAssetFile m_Resource;
 	CFilePath m_Path;
 };
 

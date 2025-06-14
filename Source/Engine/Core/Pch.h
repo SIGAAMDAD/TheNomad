@@ -13,6 +13,8 @@
 #include <SDL2/SDL_mutex.h>
 #include <SDL2/SDL.h>
 
+#include <glm/glm.hpp>
+
 #include <EASTL/shared_ptr.h>
 #include <EASTL/unique_ptr.h>
 #include <EASTL/vector.h>

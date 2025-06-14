@@ -21,7 +21,7 @@ public:
 
 	void Draw( void );
 private:
-	eastl::unordered_map<CFilePath, IContentView> m_DirectoryList;
+	eastl::unordered_map<eastl::string, IContentView *> m_DirectoryList;
 };
 
 };

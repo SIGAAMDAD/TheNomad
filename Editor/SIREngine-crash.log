@@ -1,0 +1,249 @@
+Generating SIREngine-crash.log and killing process 1666513, please wait... *** Fatal Error ***
+Segmentation fault (signal 11)
+Address: (nil)
+System: Linux one-desktop-to-rule-them-all 5.15.0-127-generic #137-Ubuntu SMP Fri Nov 8 15:21:01 UTC 2024 x86_64 x86_64 x86_64 GNU/Linux
+
+
+Executing: gdb --quiet --batch --command=gdb-respfile-FX2cQ8
+[New LWP 1666514]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+0x00007f18b78da42f in __GI___wait4 (pid=1666519, stat_loc=0x7ffdff5a6b4c, options=0, usage=0x0) at ../sysdeps/unix/sysv/linux/wait4.c:30
+
+* Loaded Libraries
+From                To                  Syms Read   Shared Object Library
+0x00007f18b7efb980  0x00007f18b806a812  Yes         /usr/local/lib/libSDL2-2.0.so.0
+0x00007f18b7e5a1c0  0x00007f18b7e5cf11  Yes (*)     /lib/x86_64-linux-gnu/libGL.so.1
+0x00007f18b7db87a0  0x00007f18b7df4f1d  Yes (*)     /lib/x86_64-linux-gnu/libvulkan.so.1
+0x00007f18b7d8ec00  0x00007f18b7d9f94c  Yes (*)     /lib/x86_64-linux-gnu/libboost_thread.so.1.74.0
+0x00007f18b7d7f500  0x00007f18b7d82252  Yes (*)     /lib/x86_64-linux-gnu/libboost_chrono.so.1.74.0
+0x00007f18b7d52da0  0x00007f18b7d683d5  Yes (*)     /usr/local/lib/libmimalloc.so.1
+0x00007f18b7bc2420  0x00007f18b7ccafc2  Yes (*)     /lib/x86_64-linux-gnu/libstdc++.so.6
+0x00007f18b7a473a0  0x00007f18b7ac28c8  Yes         /lib/x86_64-linux-gnu/libm.so.6
+0x00007f18b7a1c660  0x00007f18b7a32805  Yes (*)     /lib/x86_64-linux-gnu/libgcc_s.so.1
+0x00007f18b7818700  0x00007f18b79aa93d  Yes         /lib/x86_64-linux-gnu/libc.so.6
+0x00007f18b80ff090  0x00007f18b8128315  Yes         /lib64/ld-linux-x86-64.so.2
+0x00007f18b7778240  0x00007f18b777a187  Yes (*)     /lib/x86_64-linux-gnu/libGLdispatch.so.0
+0x00007f18b77056c0  0x00007f18b771f080  Yes (*)     /lib/x86_64-linux-gnu/libGLX.so.0
+0x00007f18b75dc0c0  0x00007f18b76666ce  Yes (*)     /lib/x86_64-linux-gnu/libX11.so.6
+0x00007f18b75a3640  0x00007f18b75b6660  Yes (*)     /lib/x86_64-linux-gnu/libxcb.so.1
+0x00007f18b7593360  0x00007f18b7594092  Yes (*)     /lib/x86_64-linux-gnu/libXau.so.6
+0x00007f18b758c1a0  0x00007f18b758d967  Yes (*)     /lib/x86_64-linux-gnu/libXdmcp.so.6
+0x00007f18b7575040  0x00007f18b7580226  Yes (*)     /lib/x86_64-linux-gnu/libbsd.so.0
+0x00007f18b7565160  0x00007f18b756b739  Yes (*)     /lib/x86_64-linux-gnu/libmd.so.0
+0x00007f18b6ce7eb0  0x00007f18b6d143d5  Yes (*)     /lib/x86_64-linux-gnu/libdbus-1.so.3
+0x00007f18b6c29cf0  0x00007f18b6ca6350  Yes (*)     /lib/x86_64-linux-gnu/libsystemd.so.0
+0x00007f18b7ea43c0  0x00007f18b7ebe0de  Yes (*)     /lib/x86_64-linux-gnu/liblzma.so.5
+0x00007f18b6b50220  0x00007f18b6c01f02  Yes (*)     /lib/x86_64-linux-gnu/libzstd.so.1
+0x00007f18b6b28120  0x00007f18b6b40ad1  Yes (*)     /lib/x86_64-linux-gnu/liblz4.so.1
+0x00007f18b6b1e500  0x00007f18b6b2169a  Yes (*)     /lib/x86_64-linux-gnu/libcap.so.2
+0x00007f18b69eca80  0x00007f18b6ad123e  Yes (*)     /lib/x86_64-linux-gnu/libgcrypt.so.20
+0x00007f18b69bba40  0x00007f18b69d0742  Yes (*)     /lib/x86_64-linux-gnu/libgpg-error.so.0
+0x00007f18b69a6600  0x00007f18b69b094e  Yes (*)     /lib/x86_64-linux-gnu/libXext.so.6
+0x00007f18b6998660  0x00007f18b699d1fc  Yes (*)     /lib/x86_64-linux-gnu/libXcursor.so.1
+0x00007f18b698b440  0x00007f18b69917e2  Yes (*)     /lib/x86_64-linux-gnu/libXrender.so.1
+0x00007f18b6983310  0x00007f18b6985961  Yes (*)     /lib/x86_64-linux-gnu/libXfixes.so.3
+0x00007f18b6970460  0x00007f18b697b67b  Yes (*)     /lib/x86_64-linux-gnu/libXi.so.6
+0x00007f18b6962360  0x00007f18b6968ec9  Yes (*)     /lib/x86_64-linux-gnu/libXrandr.so.2
+0x00007f18b695c240  0x00007f18b695cf1d  Yes (*)     /lib/x86_64-linux-gnu/libXss.so.1
+0x00007f18b6599670  0x00007f18b65f4461  Yes (*)     /lib/x86_64-linux-gnu/libGLX_nvidia.so.0
+0x00007f18b64c0780  0x00007f18b651d711  Yes (*)     /lib/x86_64-linux-gnu/libnvidia-glsi.so.555.42.06
+0x00007f18b64ac050  0x00007f18b64adbd1  Yes (*)     /lib/x86_64-linux-gnu/libnvidia-tls.so.555.42.06
+0x00007f18b46c8000  0x00007f18b5495561  Yes (*)     /lib/x86_64-linux-gnu/libnvidia-glcore.so.555.42.06
+0x00007f18b4463040  0x00007f18b4463105  Yes         /lib/x86_64-linux-gnu/libdl.so.2
+0x00007f18b445e040  0x00007f18b445e105  Yes         /lib/x86_64-linux-gnu/libpthread.so.0
+0x00007f18b4459080  0x00007f18b4459275  Yes         /lib/x86_64-linux-gnu/librt.so.1
+0x00007f18b209ced0  0x00007f18b3bb2af1  Yes (*)     /lib/x86_64-linux-gnu/libnvidia-gpucomp.so.555.42.06
+0x00007f18b1efd0a0  0x00007f18b1f05b29  Yes (*)     /lib/x86_64-linux-gnu/libxcb-glx.so.0
+0x00007f18b1ee60c0  0x00007f18b1eeb0b7  Yes (*)     /lib/x86_64-linux-gnu/libxcb-randr.so.0
+0x00007f18b1eda0e0  0x00007f18b1edb137  Yes (*)     /lib/x86_64-linux-gnu/libxcb-dri3.so.0
+0x00007f18b1ed4040  0x00007f18b1ed411f  Yes (*)     /lib/x86_64-linux-gnu/libX11-xcb.so.1
+0x00007f18b6d3a760  0x00007f18b6d448ab  Yes (*)     /lib/x86_64-linux-gnu/libdrm.so.2
+0x00007f18b1900ec0  0x00007f18b1919680  Yes (*)     /lib/x86_64-linux-gnu/libudev.so.1
+(*): Shared library is missing debugging information.
+
+* Threads
+  Id   Target Id                                           Frame 
+* 1    Thread 0x7f18b755e780 (LWP 1666513) "Valden.x64"    0x00007f18b78da42f in __GI___wait4 (pid=1666519, stat_loc=0x7ffdff5a6b4c, options=0, usage=0x0) at ../sysdeps/unix/sysv/linux/wait4.c:30
+  2    Thread 0x7f18b755b640 (LWP 1666514) "LoggingThread" __futex_abstimed_wait_common64 (private=-1209221120, cancel=true, abstime=0x7f18b755a480, op=137, expected=0, futex_word=0x7f18b755a570) at ./nptl/futex-internal.c:57
+
+* FPU Status
+  R7: Empty   0x00000000000000000000
+  R6: Empty   0x00000000000000000000
+  R5: Empty   0x00000000000000000000
+  R4: Empty   0x00000000000000000000
+  R3: Empty   0x00000000000000000000
+  R2: Empty   0x00000000000000000000
+  R1: Empty   0x00000000000000000000
+=>R0: Empty   0x00000000000000000000
+
+Status Word:         0x0000                                            
+                       TOP: 0
+Control Word:        0x037f   IM DM ZM OM UM PM
+                       PC: Extended Precision (64-bits)
+                       RC: Round to nearest
+Tag Word:            0xffff
+Instruction Pointer: 0x00:0x00000000
+Operand Pointer:     0x00:0x00000000
+Opcode:              0x0000
+
+* Registers
+rax            0xfffffffffffffe00  -512
+rbx            0x196dd7            1666519
+rcx            0x7f18b78da42f      139744135455791
+rdx            0x0                 0
+rsi            0x7ffdff5a6b4c      140728887569228
+rdi            0x196dd7            1666519
+rbp            0xb                 0xb
+rsp            0x7ffdff5a6b10      0x7ffdff5a6b10
+r8             0x0                 0
+r9             0x7ffdff5a80e0      140728887574752
+r10            0x0                 0
+r11            0x293               659
+r12            0x3e8               1000
+r13            0x0                 0
+r14            0x3f666666          1063675494
+r15            0x7ffdff5a81f0      140728887575024
+rip            0x7f18b78da42f      0x7f18b78da42f <__GI___wait4+95>
+eflags         0x293               [ CF AF SF IF ]
+cs             0x33                51
+ss             0x2b                43
+ds             0x0                 0
+es             0x0                 0
+fs             0x0                 0
+gs             0x0                 0
+
+* Backtrace
+
+Thread 2 (Thread 0x7f18b755b640 (LWP 1666514) "LoggingThread"):
+#0  __futex_abstimed_wait_common64 (private=-1209221120, cancel=true, abstime=0x7f18b755a480, op=137, expected=0, futex_word=0x7f18b755a570) at ./nptl/futex-internal.c:57
+        sc_cancel_oldtype = 1
+        sc_ret = <optimized out>
+        resultvar = <optimized out>
+        __arg6 = <optimized out>
+        __arg5 = <optimized out>
+        __arg4 = <optimized out>
+        __arg3 = <optimized out>
+        __arg2 = <optimized out>
+        __arg1 = <optimized out>
+        _a6 = <optimized out>
+        _a5 = <optimized out>
+        _a4 = <optimized out>
+        _a3 = <optimized out>
+        _a2 = <optimized out>
+        _a1 = <optimized out>
+#1  __futex_abstimed_wait_common (cancel=true, private=-1209221120, abstime=0x7f18b755a480, clockid=72593408, expected=0, futex_word=0x7f18b755a570) at ./nptl/futex-internal.c:87
+        err = <optimized out>
+        clockbit = 1404043520
+        op = 137
+        err = <optimized out>
+        clockbit = <optimized out>
+        op = <optimized out>
+#2  __GI___futex_abstimed_wait_cancelable64 (futex_word=futex_word@entry=0x7f18b755a570, expected=expected@entry=0, clockid=clockid@entry=1, abstime=abstime@entry=0x7f18b755a480, private=private@entry=0) at ./nptl/futex-internal.c:139
+No locals.
+#3  0x00007f18b7883e9b in __pthread_cond_wait_common (abstime=0x7f18b755a480, clockid=1, mutex=0x7f18b755a520, cond=0x7f18b755a548) at ./nptl/pthread_cond_wait.c:503
+        spin = 0
+        buffer = {__routine = 0x7f18b7883720 <__condvar_cleanup_waiting>, __arg = 0x7f18b755a3e0, __canceltype = -10713078, __prev = 0x0}
+        cbuffer = {wseq = 0, cond = 0x7f18b755a548, mutex = 0x7f18b755a520, private = 0}
+        err = <optimized out>
+        g = 0
+        flags = <optimized out>
+        g1_start = <optimized out>
+        maxspin = 0
+        signals = <optimized out>
+        result = 0
+        wseq = 0
+        seq = 0
+        private = 0
+        maxspin = <optimized out>
+        err = <optimized out>
+        result = <optimized out>
+        wseq = <optimized out>
+        g = <optimized out>
+        seq = <optimized out>
+        flags = <optimized out>
+        private = <optimized out>
+        signals = <optimized out>
+        done = <optimized out>
+        g1_start = <optimized out>
+        spin = <optimized out>
+        buffer = <optimized out>
+        cbuffer = <optimized out>
+        s = <optimized out>
+#4  ___pthread_cond_timedwait64 (cond=0x7f18b755a548, mutex=0x7f18b755a520, abstime=0x7f18b755a480) at ./nptl/pthread_cond_wait.c:652
+        flags = <optimized out>
+        clockid = 1
+#5  0x00005610d6f782bc in boost::posix::pthread_cond_timedwait (t=0x7f18b755a480, m=0x7f18b755a520, c=0x7f18b755a548) at /usr/include/boost/thread/pthread/pthread_helpers.hpp:123
+        ret = <optimized out>
+#6  boost::condition_variable::do_wait_until (timeout=..., m=..., this=0x7f18b755a520) at /usr/include/boost/thread/pthread/condition_variable.hpp:122
+        guard = {m = 0x7f18b755a470}
+        check_for_interruption = {thread_info = 0x0, m = 0x7f18b755a520, set = false, done = false}
+        the_mutex = 0x7f18b755a520
+        cond_res = <optimized out>
+        cond_res = <optimized out>
+        guard = <optimized out>
+        check_for_interruption = <optimized out>
+        the_mutex = <optimized out>
+#7  boost::condition_variable::wait_until<boost::chrono::duration<long, boost::ratio<1l, 1000000000l> >, bool (*)()> (pred=0x5610d6f73b13 <boost::this_thread::hidden::always_false()>, t=..., lock=..., this=0x7f18b755a520) at /usr/include/boost/thread/pthread/condition_variable_fwd.hpp:288
+        ts = {dur = {ts_val = {tv_sec = 684204, tv_nsec = 550744410}}}
+        ts = <optimized out>
+#8  boost::condition_variable::wait_for<long, boost::ratio<1l, 1000l>, bool (*)()> (pred=0x5610d6f73b13 <boost::this_thread::hidden::always_false()>, d=..., lock=..., this=0x7f18b755a520) at /usr/include/boost/thread/pthread/condition_variable_fwd.hpp:321
+No locals.
+#9  boost::this_thread::sleep_for<long, boost::ratio<1l, 1000l> > (d=...) at /usr/include/boost/thread/pthread/thread_data.hpp:300
+        mut = {m = {__data = {__lock = 0, __count = 0, __owner = 0, __nusers = 0, __kind = 0, __spins = 0, __elision = 0, __list = {__prev = 0x0, __next = 0x0}}, __size = '\000' <repeats 39 times>, __align = 0}}
+        lk = {m = 0x7f18b755a4b0, is_locked = false}
+        cv = {internal_mutex = {__data = {__lock = 0, __count = 0, __owner = 0, __nusers = 1, __kind = 0, __spins = 0, __elision = 0, __list = {__prev = 0x0, __next = 0x0}}, __size = '\000' <repeats 12 times>, "\001", '\000' <repeats 26 times>, __align = 0}, cond = {__data = {__wseq = {__value64 = 2, __value32 = {__low = 2, __high = 0}}, __g1_start = {__value64 = 0, __value32 = {__low = 0, __high = 0}}, __g_refs = {2, 0}, __g_size = {0, 0}, __g1_orig_size = 0, __wrefs = 10, __g_signals = {0, 0}}, __size = "\002", '\000' <repeats 15 times>, "\002", '\000' <repeats 19 times>, "\n\000\000\000\000\000\000\000\000\000\000", __align = 2}}
+#10 0x00005610d6f73a4f in SIREngine::CLogManager::LogThread (unused=unused@entry=0x0) at /home/noah/Projects/TheNomad/Source/Engine/Core/Logging/Logger.cpp:315
+        lock = {m_pMutex = 0x40956401520}
+        queueMessage = {szMessage = "[2025.01.13-21.46.33:1736826393]LogSystem:   Engine Version: SIRENGINE_VERSION\n", '\000' <repeats 1968 times>, nStringLength = 79}
+#11 0x00007f18b7f92d4a in SDL_RunThread (thread=0x409558e0000) at /home/noah/Drive2/noah/Repos/Libraries/SDL2-2.30.0/src/thread/SDL_thread.c:292
+        userdata = 0x0
+        userfunc = 0x5610d6f739c8 <SIREngine::CLogManager::LogThread(void*)>
+        statusloc = 0x409558e0010
+#12 0x00007f18b805a6cd in RunThread (data=<optimized out>) at /home/noah/Drive2/noah/Repos/Libraries/SDL2-2.30.0/src/thread/pthread/SDL_systhread.c:76
+No locals.
+#13 0x00007f18b7884ac3 in start_thread (arg=<optimized out>) at ./nptl/pthread_create.c:442
+        ret = <optimized out>
+        pd = <optimized out>
+        out = <optimized out>
+        unwind_buf = {cancel_jmp_buf = {{jmp_buf = {140728887566016, -2644356538816096879, 139744131790400, 22, 139744135104464, 140728887566368, 2701092246599669137, 2701091796663965073}, mask_was_saved = 0}}, priv = {pad = {0x0, 0x0, 0x0, 0x0}, data = {prev = 0x0, cleanup = 0x0, canceltype = 0}}}
+        not_first_call = <optimized out>
+#14 0x00007f18b7916850 in clone3 () at ../sysdeps/unix/sysv/linux/x86_64/clone3.S:81
+No locals.
+
+Thread 1 (Thread 0x7f18b755e780 (LWP 1666513) "Valden.x64"):
+#0  0x00007f18b78da42f in __GI___wait4 (pid=1666519, stat_loc=0x7ffdff5a6b4c, options=0, usage=0x0) at ../sysdeps/unix/sysv/linux/wait4.c:30
+        sc_ret = -512
+        sc_cancel_oldtype = 0
+        sc_ret = <optimized out>
+#1  0x00005610d6f795db in SIREngine::System::CatchSignal (nSignum=11, pSigInfo=<optimized out>, pContext=<optimized out>) at /home/noah/Projects/TheNomad/Source/Engine/Core/System/Posix/PosixCrashHandler.cpp:327
+        status = 0
+        debugPid = 1666519
+        fd = {23, 27}
+#2  <signal handler called>
+No locals.
+#3  eastl::vector<Valden::FileView_s*, eastl::allocator>::begin (this=0x6c6d2c38326182f3) at /home/noah/Projects/TheNomad/Editor/../ThirdParty/EASTL/include/EASTL/vector.h:705
+No locals.
+#4  Valden::CBrowserInstance::Draw (this=0x40955912940) at /home/noah/Projects/TheNomad/Editor/Source/ContentBrowser/BrowserInstance.cpp:162
+        file = <optimized out>
+        __for_range = <error reading variable: Cannot access memory at address 0x6c6d2c38326182f3>
+        __for_begin = <optimized out>
+        __for_end = <optimized out>
+        pDirectory = 0x6c6d2c383261726b
+        bPushedColor = <optimized out>
+        pHistory = 0x0
+        panelWidth = <optimized out>
+        columnCount = <optimized out>
+        columnIndex = 0
+#5  0x00005610d6f256fe in Valden::CContentBrowser::Render (this=<optimized out>) at /home/noah/Projects/TheNomad/Editor/Source/ContentBrowser.cpp:31
+        it = @0x40955873060: {mPair = {<eastl::compressed_pair_imp<Valden::CBrowserInstance*, eastl::default_delete<Valden::CBrowserInstance>, 2>> = {<eastl::default_delete<Valden::CBrowserInstance>> = {<No data fields>}, mFirst = 0x40955912940}, <No data fields>}}
+        __for_range = <optimized out>
+        __for_begin = 0x40955873060
+        __for_end = 0x40955873068
+#6  0x00005610d6f265aa in Valden::CApplication::Frame (this=<optimized out>, nFrameTic=<optimized out>) at /home/noah/Projects/TheNomad/Editor/Source/ValdenApplication.cpp:185
+No locals.
+#7  0x00005610d6f7abd2 in SIREngine::System::PosixApplication::Run (this=<optimized out>) at /home/noah/Projects/TheNomad/Source/Engine/Core/System/Posix/PosixApplication.cpp:72
+No locals.
+#8  0x00005610d6f7bff1 in main (argc=1, argv=0x7ffdff5a8458) at /home/noah/Projects/TheNomad/Source/Engine/Core/System/Posix/PosixApplication.cpp:314
+No locals.
+[Inferior 1 (process 1666513) detached]

@@ -1,0 +1,14 @@
+{
+	"EngineConfig": {
+		"e.LogLevel": 0,
+		"e.LogToFile": true,
+		"in.HapticFeedbackEnabled": true
+	},
+	"RendererConfig": {
+		"r.AntiAliasQuality": 0,
+		"r.AntiAliasType": 0,
+		"vid.RenderAPI": 0,
+		"vid.VSync": -1,
+		"vid.WindowMode": 0
+	}
+}

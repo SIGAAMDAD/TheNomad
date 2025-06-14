@@ -1,5 +1,10 @@
 #include "OpenGLContext.h"
 #include "ngl.h"
+#if SIRENGINE_BUILD_EDITOR == 1
+#include <imgui/imgui.h>
+#include <imgui/backends/imgui_impl_sdl2.h>
+#include <imgui/backends/imgui_impl_opengl3.h>
+#endif
 
 extern void GL_LoadProcs( void );
 
@@ -58,6 +63,8 @@ bool GLContext::CreateWindow( void )
 
 	GL_LoadProcs();
 
+
+
 	return true;
 }
 
@@ -72,10 +79,22 @@ void GLContext::BeginFrame( void )
 	nglEnable( GL_DEPTH_TEST );
 	nglEnable( GL_SCISSOR_TEST );
 	nglEnable( GL_BLEND );
+
+#if SIRENGINE_BUILD_EDITOR == 1
+	ImGui_ImplOpenGL3_NewFrame();
+	ImGui_ImplSDL2_NewFrame();
+	ImGui::NewFrame();
+#endif
 }
 
 void GLContext::EndFrame( void )
 {
+#if SIRENGINE_BUILD_EDITOR == 1
+	ImGui::Render();
+	ImGui_ImplOpenGL3_RenderDrawData( ImGui::GetDrawData() );
+	ImGui::UpdatePlatformWindows();
+#endif
+
 	SDL_GL_MakeCurrent( m_pWindow, m_pContext );
 	nglFlush();
 	SDL_GL_SwapWindow( m_pWindow );

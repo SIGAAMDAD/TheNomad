@@ -6,6 +6,7 @@
 #endif
 
 #include <Engine/Core/EngineSystem.h>
+#include <Engine/Core/Logging/Logger.h>
 #include "EditorLayer.h"
 
 using namespace SIREngine;
@@ -31,6 +32,8 @@ public:
 private:
 	eastl::vector<eastl::shared_ptr<IEditorLayer>> m_LayerStack;
 };
+
+SIRENGINE_DECLARE_LOG_CATEGORY( Valden, ELogLevel::Info );
 
 };
 

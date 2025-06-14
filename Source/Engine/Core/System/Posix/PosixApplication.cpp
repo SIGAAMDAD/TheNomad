@@ -76,6 +76,21 @@ void PosixApplication::Run( void )
 	}
 }
 
+bool GetFileStats( FileStats_t *pStats, const CFilePath& path )
+{
+	struct stat fdata;
+
+	if ( stat( path.c_str(), &fdata ) == 0 ) {
+		pStats->CreationTime = fdata.st_ctime;
+		pStats->ModificationTime = fdata.st_mtime;
+		pStats->Size = fdata.st_size;
+		return true;
+	}
+
+	memset( pStats, 0, sizeof( *pStats ) );
+	return false;
+}
+
 void Error( const char *pError )
 {
 	FileWrite( pError, strlen( pError ), SIRENGINE_STDERR_HANDLE );
@@ -157,11 +172,14 @@ void PosixApplication::Init( void )
 #endif
 	contextInfo.nWindowPositionX = SDL_WINDOWPOS_CENTERED;
 	contextInfo.nWindowPositionY = SDL_WINDOWPOS_CENTERED;
-	contextInfo.nWindowWidth = 1280;
-	contextInfo.nWindowHeight = 720;
+
 #if SIRENGINE_BUILD_EDITOR == 1
+	contextInfo.nWindowWidth = 1920;
+	contextInfo.nWindowHeight = 1080;
 	contextInfo.nAppVersion = SIRENGINE_MAKE_VERSION( 2, 0, 0 );
 #else
+	contextInfo.nWindowWidth = 1280;
+	contextInfo.nWindowHeight = 720;
 	contextInfo.nAppVersion = SIRENGINE_MAKE_VERSION( 1, 2, 0 );
 #endif
 

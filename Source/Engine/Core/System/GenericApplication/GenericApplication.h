@@ -29,6 +29,13 @@ public:
 	static void QuitGame( const Events::IEventBase *pEventData );
 };
 
+typedef struct FileStats_s {
+	uint64_t ModificationTime;
+	uint64_t CreationTime;
+	uint64_t Size;
+} FileStats_t;
+
+bool GetFileStats( FileStats_t *pStats, const CFilePath& path );
 void Error( const char *pError );
 bool CreateDirectory( const char *pDirectory );
 size_t FileWrite( const void *pBuffer, size_t nBytes, FileHandle_t hFile );
